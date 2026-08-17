@@ -28,6 +28,10 @@ body{-webkit-tap-highlight-color:transparent;}
 .nav-btn:hover{color:var(--text);}
 .nav-btn.active{color:var(--blue);background:var(--blue-bg);border-color:var(--blue-border);font-weight:600;}
 
+/* ===== 版本徽标 ===== */
+.ver-badge{position:fixed;z-index:120;top:64px;right:12px;font-size:11px;font-weight:600;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:999px;padding:4px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);letter-spacing:.2px;pointer-events:none;}
+@media (min-width:768px) and (orientation:landscape),(min-width:900px){.ver-badge{top:14px;right:16px;}}
+
 /* ===== 主容器 ===== */
 .main{margin-top:72px;padding:48px 24px 120px;width:100%;max-width:760px;margin-left:auto;margin-right:auto;}
 
@@ -435,6 +439,8 @@ body{-webkit-tap-highlight-color:transparent;}
 </style>
 </head>
 <body>
+
+<div class="ver-badge">v2 · 2026-08-18</div>
 
 <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
 
