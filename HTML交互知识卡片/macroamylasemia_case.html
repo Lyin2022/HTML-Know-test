@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>淀粉酶升高的真相 — 交互式案例学习</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#F5F5F7;--bg2:#FFFFFF;--card:#FFFFFF;--border:#E5E5E7;
+  --text:#1D1D1F;--text2:#86868B;--text3:#A1A1A6;
+  --blue:#0071E3;--blue-bg:#F0F7FF;--blue-border:#CCE3F9;
+  --purple:#5E5CE6;--purple-bg:#F4F4FF;--purple-border:#DEDEFC;
+  --red:#D32F2F;--red-bg:#FFF5F5;--red-border:#F5C6C6;
+  --amber:#B45309;--amber-bg:#FFFBF5;--amber-border:#F5E0C6;
+  --green:#2E7D32;--green-bg:#F4FBF5;--green-border:#CDE9D0;
+  --sidebar-w:210px;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Inter","PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+::selection{background:var(--blue);color:#fff;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{-webkit-tap-highlight-color:transparent;}
+
+/* ===== 导航 ===== */
+.topnav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(245,245,247,0.82);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:0 32px;height:56px;}
+.nav-brand{font-weight:800;font-size:15px;color:var(--text);margin-right:auto;letter-spacing:-0.3px;}
+.nav-btn{padding:7px 16px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;background:transparent;color:var(--text2);transition:all .2s;}
+.nav-btn:hover{color:var(--text);}
+.nav-btn.active{color:var(--blue);background:var(--blue-bg);border-color:var(--blue-border);font-weight:600;}
+
+/* ===== 主容器 ===== */
+.main{margin-top:72px;padding:48px 24px 120px;width:100%;max-width:760px;margin-left:auto;margin-right:auto;}
+
+/* ===== 通用组件 ===== */
+.section{display:none;animation:fadeUp .5s cubic-bezier(0.22,1,0.36,1);}
+.section.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+.sec-title{font-size:clamp(22px,5vw,34px);font-weight:800;margin-bottom:14px;letter-spacing:-0.8px;line-height:1.15;}
+.sec-desc{font-size:16px;color:var(--text2);margin-bottom:44px;line-height:1.7;}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:20px;}
+.card-click{cursor:pointer;transition:all .2s;}
+.card-click:hover{border-color:#D2D2D7;}
+
+.badge{display:inline-block;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:0.3px;margin-right:6px;}
+.badge-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border);}
+.badge-purple{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border);}
+.badge-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.badge-amber{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.badge-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+
+.btn{padding:11px 26px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-primary:hover{background:#0062C4;transform:translateY(-1px);}
+.btn-outline{background:transparent;color:var(--text);border:1px solid #D2D2D7;}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+
+/* ===== 0: 首页 ===== */
+.hero{text-align:center;padding:120px 0 72px;}
+.hero-tag{margin-bottom:24px;}
+.hero h1{font-size:clamp(30px,8vw,52px);font-weight:900;letter-spacing:-1.5px;line-height:1.1;margin-bottom:20px;}
+.hero h1 em{font-style:normal;color:var(--blue);}
+.hero p{font-size:18px;color:var(--text2);max-width:560px;margin:0 auto 40px;line-height:1.7;}
+.hero-stats{display:flex;gap:40px;justify-content:center;margin-bottom:48px;}
+.hero-stat{text-align:center;}
+.hero-stat .num{font-size:clamp(28px,7vw,44px);font-weight:900;color:var(--text);letter-spacing:-1px;}
+.hero-stat .label{font-size:12px;color:var(--text2);margin-top:4px;letter-spacing:0.5px;text-transform:uppercase;}
+
+/* ===== 1: 病史 ===== */
+.timeline{position:relative;padding-left:44px;}
+.timeline::before{content:'';position:absolute;left:16px;top:8px;bottom:8px;width:1px;background:var(--border);}
+.tl-item{position:relative;margin-bottom:32px;}
+.tl-item::before{content:'';position:absolute;left:-32px;top:7px;width:10px;height:10px;border-radius:50%;border:2px solid var(--text3);background:var(--bg);}
+.tl-item:nth-child(1)::before{border-color:var(--blue);}
+.tl-item:nth-child(2)::before{border-color:var(--purple);}
+.tl-item:nth-child(3)::before{border-color:var(--amber);}
+.tl-item:nth-child(4)::before{border-color:var(--red);}
+.tl-year{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;letter-spacing:0.2px;}
+.tl-item:nth-child(1) .tl-year{color:var(--blue);}
+.tl-item:nth-child(2) .tl-year{color:var(--purple);}
+.tl-item:nth-child(3) .tl-year{color:var(--amber);}
+.tl-item:nth-child(4) .tl-year{color:var(--red);}
+.tl-text{font-size:15px;color:var(--text2);line-height:1.75;}
+
+/* ===== 2: 证据链 ===== */
+.evidence-chain{display:flex;flex-direction:column;gap:0;}
+.ev-step{display:flex;gap:20px;align-items:stretch;}
+.ev-left{display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0;}
+.ev-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:8px;background:var(--text3);}
+.ev-line{width:1px;flex:1;min-height:8px;background:var(--border);}
+.ev-card{flex:1;margin-bottom:8px;}
+.ev-header{display:flex;align-items:center;gap:12px;cursor:pointer;padding:20px 24px;background:var(--card);border:1px solid var(--border);border-radius:14px;transition:all .2s;}
+.ev-header:hover{border-color:#D2D2D7;}
+.ev-header.open{border-radius:14px 14px 0 0;border-color:var(--blue-border);}
+.ev-icon{font-size:20px;flex-shrink:0;}
+.ev-title{font-size:16px;font-weight:700;flex:1;}
+.ev-arrow{font-size:12px;color:var(--text3);transition:transform .3s;}
+.ev-header.open .ev-arrow{transform:rotate(180deg);}
+.ev-body{display:none;padding:20px 24px;background:#F9F9FB;border:1px solid var(--border);border-top:none;border-radius:0 0 14px 14px;font-size:15px;color:var(--text2);line-height:1.8;}
+.ev-body.show{display:block;animation:fadeUp .3s ease;}
+.ev-body strong{color:var(--text);font-weight:600;}
+.hl-blue{color:var(--blue)!important;}
+.hl-red{color:var(--red)!important;}
+.hl-amber{color:var(--amber)!important;}
+.hl-green{color:var(--green)!important;}
+.hl-purple{color:var(--purple)!important;}
+
+/* ===== 3: 矛盾点 ===== */
+.contra-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.contra-card{padding:24px;background:var(--card);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s;}
+.contra-card:hover{border-color:#D2D2D7;}
+.contra-card.revealed{border-left:3px solid var(--red);background:var(--red-bg);}
+.contra-q{font-size:16px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.contra-hint{font-size:14px;color:var(--text2);margin-bottom:16px;line-height:1.6;}
+.contra-answer{display:none;font-size:14px;color:var(--text2);line-height:1.8;padding-top:16px;border-top:1px solid var(--border);}
+.contra-answer.show{display:block;animation:fadeUp .3s ease;}
+.contra-answer strong{color:var(--text);font-weight:600;}
+.contra-reveal{font-size:12px;color:var(--blue);font-weight:600;margin-top:12px;}
+
+/* ===== 4: AcCR ===== */
+.ag-calc{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.ag-input-card{padding:28px;}
+.ag-formula{font-size:16px;font-weight:800;font-family:"SF Mono","Courier New",monospace;color:var(--text);text-align:center;margin-bottom:20px;letter-spacing:0.3px;line-height:1.6;}
+.ag-sliders{display:flex;flex-direction:column;gap:18px;}
+.ag-slider-row{display:flex;align-items:center;gap:14px;}
+.ag-slider-row label{font-size:13px;font-weight:600;width:70px;flex-shrink:0;color:var(--text2);}
+.ag-slider-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#E5E5E7;outline:none;}
+.ag-slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--blue);cursor:pointer;border:4px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.15);}
+.ag-slider-row .val{font-size:15px;font-weight:700;width:60px;text-align:right;font-family:"SF Mono","Courier New",monospace;color:var(--text);}
+.ag-result{text-align:center;padding:20px;border-radius:12px;margin-top:16px;border:1px solid var(--border);background:#F9F9FB;}
+.ag-result .ag-val{font-size:36px;font-weight:900;color:var(--text);letter-spacing:-1px;}
+.ag-result .ag-label{font-size:13px;color:var(--text2);margin-top:4px;}
+.ag-normal{background:var(--green-bg);border-color:var(--green-border);}
+.ag-normal .ag-val{color:var(--green);}
+.ag-high{background:var(--red-bg);border-color:var(--red-border);}
+.ag-high .ag-val{color:var(--red);}
+.ag-low{background:var(--purple-bg);border-color:var(--purple-border);}
+.ag-low .ag-val{color:var(--purple);}
+
+.ag-compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.ag-type{padding:24px;border-radius:14px;text-align:center;background:var(--card);border:1px solid var(--border);}
+.ag-type-high{border-top:3px solid var(--red);}
+.ag-type-normal{border-top:3px solid var(--blue);}
+.ag-type-low{border-top:3px solid var(--purple);}
+.ag-type h3{font-size:15px;font-weight:700;margin-bottom:10px;}
+.ag-type p{font-size:13px;color:var(--text2);line-height:1.7;}
+.ag-type .arrow{font-size:14px;margin:4px 0;color:var(--text2);}
+
+/* ===== 5: 诊断 ===== */
+.dx-final{text-align:center;padding:40px 32px;background:var(--card);border:1px solid var(--border);border-radius:18px;margin-bottom:24px;}
+.dx-final .label{font-size:12px;color:var(--blue);font-weight:700;letter-spacing:1.5px;margin-bottom:12px;text-transform:uppercase;}
+.dx-final h2{font-size:clamp(22px,6vw,28px);font-weight:900;margin-bottom:12px;letter-spacing:-0.5px;}
+.dx-list{text-align:left;max-width:500px;margin:24px auto 0;}
+.dx-item{display:flex;align-items:center;gap:12px;padding:14px 0;font-size:15px;color:var(--text2);border-bottom:1px solid var(--border);}
+.dx-item:last-child{border-bottom:none;}
+.dx-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--text3);}
+.dx-item strong{color:var(--text);font-weight:600;}
+
+/* ===== 6: 测验 ===== */
+.quiz-card{padding:28px;margin-bottom:16px;}
+.quiz-q{font-size:17px;font-weight:700;margin-bottom:20px;display:flex;gap:12px;line-height:1.5;}
+.quiz-q .qnum{color:var(--blue);flex-shrink:0;font-weight:900;}
+.quiz-options{display:flex;flex-direction:column;gap:10px;}
+.quiz-opt{padding:14px 18px;border-radius:10px;border:1px solid var(--border);cursor:pointer;font-size:15px;color:var(--text2);transition:all .15s;display:flex;align-items:center;gap:12px;}
+.quiz-opt:hover{border-color:#D2D2D7;color:var(--text);}
+.quiz-opt .opt-letter{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:#F5F5F7;color:var(--text2);flex-shrink:0;}
+.quiz-opt.correct{border-color:var(--green);background:var(--green-bg);color:var(--green);}
+.quiz-opt.correct .opt-letter{background:var(--green);color:#fff;}
+.quiz-opt.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red);}
+.quiz-opt.wrong .opt-letter{background:var(--red);color:#fff;}
+.quiz-opt.disabled{pointer-events:none;opacity:0.55;}
+.quiz-explain{display:none;margin-top:16px;padding:16px 18px;border-radius:10px;background:#F9F9FB;font-size:14px;color:var(--text2);line-height:1.7;}
+.quiz-explain.show{display:block;animation:fadeUp .3s ease;}
+.quiz-explain strong{color:var(--text);font-weight:600;}
+
+.score-card{text-align:center;padding:36px;background:var(--card);border:1px solid var(--border);border-radius:18px;margin-top:24px;}
+.score-num{font-size:clamp(42px,12vw,56px);font-weight:900;color:var(--text);letter-spacing:-2px;}
+.score-label{font-size:15px;color:var(--text2);margin-top:4px;}
+
+/* ===== 底部 ===== */
+.bottom-nav{display:flex;justify-content:space-between;align-items:center;margin-top:48px;padding-top:24px;border-top:1px solid var(--border);}
+.step-indicator{display:flex;gap:8px;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:#E5E5E7;transition:all .3s;}
+.step-dot.active{background:var(--blue);}
+.step-dot.done{background:var(--text3);}
+
+/* ===== 响应式 - 平板 ===== */
+@media(max-width:1024px){
+  .main{padding:40px 28px 100px;}
+  .topnav{padding:0 20px;gap:4px;}
+  .nav-btn{padding:6px 12px;font-size:12px;}
+  .nav-brand{font-size:14px;}
+  .hero h1{font-size:42px;}
+  .hero p{font-size:16px;}
+  .hero-stats{gap:28px;}
+  .hero-stat .num{font-size:38px;}
+}
+
+/* ===== 响应式 - 手机 ===== */
+@media(max-width:768px){
+  /* 导航：横向滚动 */
+  .topnav{padding:0 12px;height:52px;gap:3px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .topnav::-webkit-scrollbar{display:none;}
+  .nav-brand{font-size:13px;margin-right:12px;flex-shrink:0;}
+  .nav-btn{padding:5px 10px;font-size:11px;flex-shrink:0;white-space:nowrap;}
+  .progress-bar{top:52px;}
+
+  /* 主容器 */
+  .main{padding:24px 16px 100px;margin-top:60px;}
+
+  /* 标题 */
+  .sec-title{font-size:24px;letter-spacing:-0.4px;}
+  .sec-desc{font-size:14px;margin-bottom:28px;}
+
+  /* 首页 */
+  .hero{padding:48px 0 40px;}
+  .hero h1{font-size:30px;letter-spacing:-0.8px;line-height:1.15;}
+  .hero h1 br{display:none;}
+  .hero p{font-size:15px;margin-bottom:28px;}
+  .hero-stats{gap:14px;flex-wrap:wrap;}
+  .hero-stat{padding:12px 16px;flex:1;min-width:90px;}
+  .hero-stat .num{font-size:28px;}
+  .hero-stat .label{font-size:10px;}
+  .hero-tag{margin-bottom:18px;}
+  .badge{font-size:10px;padding:3px 9px;margin-right:4px;}
+
+  /* 卡片 */
+  .card{padding:20px;border-radius:12px;margin-bottom:14px;}
+  .btn{padding:10px 20px;font-size:13px;}
+
+  /* 时间线 */
+  .timeline{padding-left:32px;}
+  .timeline::before{left:11px;}
+  .tl-item{margin-bottom:20px;}
+  .tl-item::before{left:-25px;width:9px;height:9px;}
+  .tl-year{font-size:12px;}
+  .tl-text{font-size:14px;line-height:1.7;}
+
+  /* 证据链 */
+  .ev-step{gap:14px;}
+  .ev-left{width:24px;}
+  .ev-dot{width:10px;height:10px;margin-top:10px;}
+  .ev-header{padding:14px 16px;border-radius:10px;gap:10px;}
+  .ev-header.open{border-radius:10px 10px 0 0;}
+  .ev-icon{font-size:18px;}
+  .ev-title{font-size:14px;line-height:1.4;}
+  .ev-body{padding:14px 16px;border-radius:0 0 10px 10px;font-size:13px;line-height:1.7;}
+  .ev-card{margin-bottom:6px;}
+
+  /* 矛盾点 */
+  .contra-grid{grid-template-columns:1fr;gap:12px;}
+  .contra-card{padding:18px;border-radius:12px;}
+  .contra-q{font-size:14px;}
+  .contra-hint{font-size:13px;margin-bottom:12px;}
+  .contra-answer{font-size:13px;line-height:1.7;padding-top:12px;}
+  .contra-reveal{font-size:11px;margin-top:8px;}
+
+  /* AG/AcCR计算器 */
+  .ag-calc{grid-template-columns:1fr;gap:14px;}
+  .ag-input-card{padding:20px;border-radius:12px;}
+  .ag-formula{font-size:15px;margin-bottom:16px;letter-spacing:0;word-break:break-all;line-height:1.5;}
+  .ag-sliders{gap:14px;}
+  .ag-slider-row label{font-size:12px;width:50px;}
+  .ag-slider-row .val{font-size:13px;width:50px;}
+  .ag-slider-row input[type=range]{height:5px;}
+  .ag-slider-row input[type=range]::-webkit-slider-thumb{width:22px;height:22px;}
+  .ag-result{padding:16px;border-radius:10px;}
+  .ag-result .ag-val{font-size:30px;}
+  .ag-result .ag-label{font-size:12px;}
+
+  .ag-compare{grid-template-columns:1fr;gap:12px;}
+  .ag-type{padding:18px;border-radius:12px;}
+  .ag-type h3{font-size:14px;}
+  .ag-type .arrow{font-size:12px;}
+  .ag-type p{font-size:12px;}
+
+  /* 诊断 */
+  .dx-final{padding:28px 20px;border-radius:16px;}
+  .dx-final h2{font-size:22px;}
+  .dx-list{margin-top:18px;}
+  .dx-item{font-size:14px;padding:12px 0;}
+
+  /* 测验 */
+  .quiz-card{padding:20px;border-radius:12px;}
+  .quiz-q{font-size:15px;gap:10px;margin-bottom:16px;}
+  .quiz-opt{padding:12px 14px;font-size:13px;border-radius:8px;gap:10px;}
+  .quiz-opt .opt-letter{width:22px;height:22px;font-size:11px;}
+  .quiz-explain{padding:12px 14px;font-size:12px;border-radius:8px;}
+  .score-card{padding:24px;border-radius:14px;}
+  .score-num{font-size:42px;}
+
+  /* 底部导航 */
+  .bottom-nav{margin-top:32px;padding-top:18px;gap:12px;flex-wrap:wrap;}
+  .bottom-nav .btn{flex:1;min-width:90px;font-size:12px;padding:9px 12px;}
+  .step-indicator{gap:6px;order:-1;width:100%;justify-content:center;margin-bottom:6px;}
+
+  /* 浮动工具 - 手机端隐藏部分 */
+  .float-tools{right:12px;bottom:calc(16px + env(safe-area-inset-bottom));gap:8px;}
+  .float-btn{width:40px;height:40px;font-size:16px;}
+  .kbd-tip{display:none;}
+
+  /* 弹窗 */
+  .modal-mask{padding:60px 12px 20px;}
+  .modal-box{padding:20px;border-radius:14px;}
+  .modal-close{top:12px;right:12px;font-size:24px;width:32px;height:32px;}
+  .logic-flow{gap:0;}
+  .lf-step{gap:14px;}
+  .lf-left{width:32px;}
+  .lf-num{width:24px;height:24px;font-size:12px;}
+  .lf-card{padding:14px 16px;border-radius:10px;margin-bottom:14px;}
+  .lf-card h4{font-size:14px;margin-bottom:6px;}
+  .lf-card h4 .tag{font-size:10px;padding:2px 7px;}
+  .lf-card p,.lf-card li{font-size:13px;line-height:1.7;}
+
+  /* 表格 - 横向滚动 */
+  .data-table,.compare-table{font-size:12px;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;}
+  .data-table th,.data-table td,.compare-table th,.compare-table td{padding:8px 10px;}
+
+  /* 笔记抽屉 */
+  .notes-drawer{width:92vw;}
+  .notes-head{padding:16px 18px;}
+  .notes-head h3{font-size:15px;}
+  .notes-body{padding:16px 18px;}
+  .notes-foot{padding:14px 18px;}
+
+  /* Toast */
+  #toast{top:60px;font-size:12px;padding:8px 16px;}
+}
+
+/* ===== 响应式 - 小屏手机 ===== */
+@media(max-width:380px){
+  .main{padding:20px 12px 90px;}
+  .hero h1{font-size:26px;}
+  .hero-stat{padding:10px 12px;min-width:80px;}
+  .hero-stat .num{font-size:24px;}
+  .sec-title{font-size:21px;}
+  .ev-header{padding:12px 14px;}
+  .ev-title{font-size:13px;}
+  .ag-slider-row{flex-wrap:wrap;gap:6px;}
+  .ag-slider-row label{width:100%;margin-bottom:2px;}
+  .ag-slider-row input[type=range]{width:100%;}
+  .ag-slider-row .val{width:100%;text-align:left;}
+  .modal-box{padding:16px;}
+  .lf-card{padding:12px 14px;}
+}
+
+/* ===== 响应式 - 侧边导航（平板 / 折叠屏内屏 / 桌面横屏） ===== */
+@media (min-width:768px) and (orientation:landscape), (min-width:900px){
+  .topnav{
+    flex-direction:column;
+    align-items:stretch;
+    top:0;left:0;right:auto;bottom:0;
+    width:var(--sidebar-w);
+    height:100vh;
+    padding:22px 14px;
+    overflow-y:auto;overflow-x:hidden;
+    border-bottom:none;border-right:1px solid var(--border);
+    gap:6px;
+  }
+  .nav-brand{margin-right:0;margin-bottom:14px;font-size:16px;padding:0 10px;}
+  .nav-btn{width:100%;text-align:left;justify-content:flex-start;padding:13px 16px;font-size:14px;border-radius:10px;white-space:nowrap;}
+  .progress-bar{top:0;left:var(--sidebar-w);right:0;}
+  .main{margin-left:var(--sidebar-w);margin-right:auto;margin-top:0;max-width:1400px;padding:48px 52px 120px;}
+  .hero{padding:72px 0 56px;}
+  .kbd-tip{left:calc(var(--sidebar-w) + 20px);}
+}
+
+/* ===== 顶部进度条 ===== */
+.progress-bar{position:fixed;top:56px;left:0;right:0;height:2px;background:transparent;z-index:99;}
+.progress-fill{height:100%;width:0;background:var(--blue);transition:width .4s ease;}
+
+/* ===== 浮动工具 ===== */
+.float-tools{position:fixed;right:20px;bottom:24px;display:flex;flex-direction:column;gap:10px;z-index:90;}
+.float-btn{width:46px;height:46px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);color:var(--text2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:all .2s;}
+.float-btn:hover{border-color:#D2D2D7;color:var(--blue);transform:translateY(-2px);}
+.kbd-tip{position:fixed;left:20px;bottom:24px;font-size:11px;color:var(--text2);background:rgba(255,255,255,0.9);border:1px solid var(--border);border-radius:999px;padding:8px 14px;z-index:90;backdrop-filter:blur(12px);}
+.kbd-tip b{color:var(--text);font-weight:600;}
+
+/* ===== 逻辑图弹窗 ===== */
+.modal-mask{position:fixed;inset:0;background:rgba(245,245,247,0.92);backdrop-filter:blur(20px);z-index:200;display:none;overflow-y:auto;padding:80px 20px;}
+.modal-mask.show{display:block;animation:fadeUp .3s ease;}
+.modal-box{max-width:780px;margin:0 auto;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:40px;position:relative;box-shadow:0 24px 80px rgba(0,0,0,0.08);}
+.modal-close{position:absolute;top:20px;right:24px;font-size:28px;color:var(--text2);cursor:pointer;background:none;border:none;line-height:1;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.modal-close:hover{background:#F5F5F7;color:var(--text);}
+.logic-flow{display:flex;flex-direction:column;gap:0;}
+.lf-step{display:flex;gap:20px;}
+.lf-left{display:flex;flex-direction:column;align-items:center;width:40px;flex-shrink:0;}
+.lf-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;}
+.lf-line{width:1px;flex:1;min-height:10px;background:var(--border);}
+.lf-card{flex:1;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 24px;}
+.lf-card h4{font-size:15px;font-weight:700;margin-bottom:8px;}
+.lf-card p{font-size:14px;color:var(--text2);line-height:1.8;}
+.lf-card ul{margin:10px 0 0;padding-left:18px;}
+.lf-card li{font-size:14px;color:var(--text2);line-height:1.9;}
+.lf-card .tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;margin-left:8px;vertical-align:middle;}
+.data-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px;}
+.data-table th,.data-table td{border:1px solid var(--border);padding:12px 14px;text-align:left;vertical-align:top;}
+.data-table th{background:#F9F9FB;color:var(--text);font-weight:700;}
+.data-table td{color:var(--text2);}
+.data-table tr:nth-child(even) td{background:#FAFAFA;}
+
+/* ===== 笔记抽屉 ===== */
+.notes-drawer{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:92vw;background:var(--bg2);border-left:1px solid var(--border);z-index:210;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,0.06);}
+.notes-drawer.show{transform:translateX(0);}
+.notes-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.notes-head h3{font-size:17px;font-weight:800;}
+.notes-body{flex:1;padding:20px 24px;overflow-y:auto;}
+.notes-body textarea{width:100%;min-height:160px;background:#F9F9FB;border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:inherit;font-size:14px;line-height:1.8;padding:14px;resize:vertical;}
+.notes-foot{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:12px;}
+.notes-hint{font-size:12px;color:var(--text2);margin-top:12px;line-height:1.7;}
+.notes-label{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:0.8px;margin:20px 0 8px;text-transform:uppercase;}
+
+/* ===== 对比表格 ===== */
+.compare-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:14px;}
+.compare-table th,.compare-table td{border:1px solid var(--border);padding:12px 14px;text-align:left;vertical-align:top;}
+.compare-table th{background:#F9F9FB;color:var(--text);font-weight:700;}
+.compare-table td{color:var(--text2);}
+.compare-table tr:nth-child(even) td{background:#FAFAFA;}
+
+/* ===== 打印（导出PDF） ===== */
+@media print{
+  .topnav,.float-tools,.kbd-tip,.progress-bar,.bottom-nav,.modal-mask,.notes-drawer{display:none!important;}
+  body{background:#fff!important;color:#111!important;overflow:visible;}
+  .main{max-width:100%;padding:0;margin:0;}
+  .section{display:block!important;page-break-inside:avoid;margin-bottom:28px;animation:none;}
+  .card,.ev-card,.contra-card,.dx-final,.ag-type,.hero-stat,.ag-result{background:#fff!important;border:1px solid #E5E5E7!important;color:#111!important;}
+  .sec-title,.ev-title,.contra-q,.tl-text,.ev-body,.quiz-q,.quiz-opt,.dx-item{color:#111!important;}
+  .badge{background:#F0F7FF!important;color:#0071E3!important;border:1px solid #CCE3F9!important;}
+  .hl-red{color:#b91c1c!important;} .hl-blue{color:#005bb5!important;} .hl-amber{color:#92400e!important;} .hl-green{color:#1b5e20!important;} .hl-purple{color:#4338ca!important;}
+  .ev-body{display:block!important;background:#F9F9FB!important;}
+  .contra-answer{display:block!important;}
+  .quiz-explain{display:block!important;background:#F9F9FB!important;}
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<!-- ===== 导航 ===== -->
+<nav class="topnav">
+  <div class="nav-brand">🧬 案例学习</div>
+  <button class="nav-btn active" onclick="goTo(0)">首页</button>
+  <button class="nav-btn" onclick="goTo(1)">病史</button>
+  <button class="nav-btn" onclick="goTo(2)">证据链</button>
+  <button class="nav-btn" onclick="goTo(3)">矛盾点</button>
+  <button class="nav-btn" onclick="goTo(4)">AcCR</button>
+  <button class="nav-btn" onclick="goTo(5)">诊断</button>
+  <button class="nav-btn" onclick="goTo(6)">测验</button>
+</nav>
+
+<div class="main">
+
+<!-- ===== 0: 首页 ===== -->
+<div class="section active" id="sec0">
+  <div class="hero">
+    <div class="hero-tag"><span class="badge badge-blue">检验-临床思维</span> <span class="badge badge-purple">巨淀粉酶血症</span> <span class="badge badge-red">真假AMY升高</span></div>
+    <h1>淀粉酶<em>升高</em>的真相</h1>
+    <p>三个患者，血AMY都升高，但都不是胰腺炎——直到有人多看了一眼尿AMY</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">3</div><div class="label">个案例</div></div>
+      <div class="hero-stat"><div class="num">4</div><div class="label">步策略法</div></div>
+      <div class="hero-stat"><div class="num">2</div><div class="label">个矛盾关键点</div></div>
+    </div>
+    <button class="btn btn-primary" onclick="goTo(1)">开始学习 →</button>
+  </div>
+</div>
+
+<!-- ===== 1: 病史 ===== -->
+<div class="section" id="sec1">
+  <div class="sec-title">📜 病史回顾</div>
+  <div class="sec-desc">三个患者，血AMY都升高，但都没有胰腺炎的表现——直到有人查了尿AMY。</div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-year">案例1：50岁女性</div>
+      <div class="tl-text">胰腺外科入院，血AMY <strong style="color:var(--red)">475↑</strong>，LIP 26正常。尿AMY多次正常。无腹痛，有咽喉痛。曾就诊二家医院，均报AMY升高、LIP正常。胰腺外科会诊无果。</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-year">案例2：68岁男性</div>
+      <div class="tl-text">肝细胞癌患者，血AMY持续升高（<strong style="color:var(--red)">344→534→419</strong>），LIP持续正常（14-18）。尿AMY/肌酐 21.65（正常范围8.3-53.8）。血AMY 534但尿AMY仅284。</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-year">案例3：肿瘤患者</div>
+      <div class="tl-text">血AMY <strong style="color:var(--red)">353→400↑</strong>，LIP正常。CT提示慢性胰腺炎待排，但无急性胰腺炎表现。胰腺外科会诊无果。</div>
+    </div>
+  </div>
+  <div class="card" style="border-color:var(--amber-border);background:var(--amber-bg);">
+    <div style="font-size:14px;font-weight:700;color:var(--amber);margin-bottom:6px;">💡 思考</div>
+    <div style="font-size:13px;color:var(--text2);">血AMY升高，但LIP正常、无腹痛——<strong style="color:var(--text)">你觉不觉得哪里不对？</strong></div>
+  </div>
+  <div class="bottom-nav">
+    <button class="btn btn-outline" onclick="goTo(0)">← 上一页</button>
+    <div class="step-indicator"><div class="step-dot done"></div><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+    <button class="btn btn-primary" onclick="goTo(2)">证据链 →</button>
+  </div>
+</div>
+
+<!-- ===== 2: 证据链 ===== -->
+<div class="section" id="sec2">
+  <div class="sec-title">🔗 证据链——"贵氏策略法"四步还原</div>
+  <div class="sec-desc">点击每一步，展开详细的检验数据和推理逻辑。从"AMY升高=胰腺炎"到真相，一步步揭开。</div>
+  <div class="evidence-chain">
+
+    <div class="ev-step">
+      <div class="ev-left"><div class="ev-dot" style="background:var(--blue);"></div><div class="ev-line"></div></div>
+      <div class="ev-card" style="flex:1;margin-bottom:12px;">
+        <div class="ev-header" onclick="toggleEv(this)">
+          <span class="ev-icon">🚨</span>
+          <span class="ev-title">步骤1：疑点——AMY升高 ≠ 胰腺炎</span>
+          <span class="ev-arrow">▼</span>
+        </div>
+        <div class="ev-body">
+          <strong>LIP正常是第一个红灯。</strong>急性胰腺炎时AMY和LIP通常同时升高，LIP对胰腺炎的阴性预测值接近100%。<br><br>
+          <strong>案例1：</strong>AMY 475↑ + LIP 26正常<br>
+          <strong>案例2：</strong>AMY 534↑ + LIP 18正常<br>
+          <strong>案例3：</strong>AMY 400↑ + LIP正常<br><br>
+          <span class="hl-red">三个案例都是"AMY↑ + LIP正常"——这组结果本身就指向非胰腺炎。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ev-step">
+      <div class="ev-left"><div class="ev-dot" style="background:var(--purple);"></div><div class="ev-line"></div></div>
+      <div class="ev-card" style="flex:1;margin-bottom:12px;">
+        <div class="ev-header" onclick="toggleEv(this)">
+          <span class="ev-icon">🔍</span>
+          <span class="ev-title">步骤2：排查——无腹痛 + 无胰腺影像学证据</span>
+          <span class="ev-arrow">▼</span>
+        </div>
+        <div class="ev-body">
+          <strong>案例1：</strong>全腹软，无压痛反跳痛，增强CT无异常<br>
+          <strong>案例2：</strong>肝细胞癌患者，无胰腺炎症状<br>
+          <strong>案例3：</strong>CT提示慢性胰腺炎待排，但无急性胰腺炎表现<br><br>
+          <span class="hl-purple">临床表现和影像学均不支持急性胰腺炎。</span>三个患者都没有胰腺炎的核心症状——<strong class="hl-amber">没有腹痛</strong>。
+        </div>
+      </div>
+    </div>
+
+    <div class="ev-step">
+      <div class="ev-left"><div class="ev-dot" style="background:var(--amber);"></div><div class="ev-line"></div></div>
+      <div class="ev-card" style="flex:1;margin-bottom:12px;">
+        <div class="ev-header" onclick="toggleEv(this)">
+          <span class="ev-icon">🔑</span>
+          <span class="ev-title">步骤3：关键分水岭——查尿AMY</span>
+          <span class="ev-arrow">▼</span>
+        </div>
+        <div class="ev-body">
+          <strong class="hl-blue">血AMY↑ + 尿AMY↑</strong> → 真性升高（来源增加，如胰腺炎、腮腺炎、肿瘤异位分泌）<br><br>
+          <strong class="hl-red">血AMY↑ + 尿AMY正常</strong> → 假性升高（清除减慢，如巨淀粉酶血症）<br><br>
+          <strong>案例1：</strong>尿AMY多次正常<br>
+          <strong>案例2：</strong>尿AMY/肌酐 21.65（正常范围8.3-53.8），血AMY 534但尿AMY仅284<br><br>
+          <span class="hl-amber">核心逻辑：血高尿正常 = AMY排不出去，不是产生多了，而是清除慢了。</span><br><br>
+          就像一条河，上游水涨了（血AMY高），但下游没水（尿AMY正常）——中间一定有"堵"。
+        </div>
+      </div>
+    </div>
+
+    <div class="ev-step">
+      <div class="ev-left"><div class="ev-dot" style="background:var(--red);"></div><div class="ev-line"></div></div>
+      <div class="ev-card" style="flex:1;margin-bottom:12px;">
+        <div class="ev-header" onclick="toggleEv(this)">
+          <span class="ev-icon">🔨</span>
+          <span class="ev-title">步骤4：确诊锤子——AcCR计算 + PEG沉淀</span>
+          <span class="ev-arrow">▼</span>
+        </div>
+        <div class="ev-body">
+          <strong>AcCR（淀粉酶肌酐清除率）</strong> = (尿淀粉酶×血肌酐)/(血淀粉酶×尿肌酐)×100%<br><br>
+          <strong class="hl-blue">正常1%-4%</strong>，<strong class="hl-red">急性胰腺炎>4%</strong>，<strong class="hl-purple">巨淀粉酶血症<1%</strong><br><br>
+          <strong>案例2验证：</strong>AcCR ≈ 0.28%，远低于1%阈值<br><br>
+          <strong>PEG沉淀：</strong>案例2 PEG沉淀后AMY从<strong class="hl-red">344→16</strong>，活性下降>95%，巨AMY确诊。<br><br>
+          <span class="hl-red">PEG沉淀了大分子复合物后AMY恢复正常 → 说明升高的不是"真正的淀粉酶"，而是"巨淀粉酶复合物"。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ev-step">
+      <div class="ev-left"><div class="ev-dot" style="background:var(--green);"></div></div>
+      <div class="ev-card" style="flex:1;margin-bottom:0;">
+        <div class="ev-header" onclick="toggleEv(this)">
+          <span class="ev-icon">✅</span>
+          <span class="ev-title">步骤5：闭环——巨淀粉酶血症</span>
+          <span class="ev-arrow">▼</span>
+        </div>
+        <div class="ev-body">
+          <strong class="hl-purple">淀粉酶与免疫球蛋白(IgG/IgA)结合形成大分子复合物</strong><br><br>
+          分子量>200kDa，无法通过肾小球滤过 → 滞留血液 → 血AMY高 → 尿AMY正常<br><br>
+          <strong>排除：</strong>胰腺炎（LIP正常、无腹痛）、腮腺炎（尿AMY正常、无腮腺肿大）<br><br>
+          <span class="hl-green">三个案例最终诊断：巨淀粉酶血症</span><br><br>
+          <strong class="hl-amber">AMY升高不等于胰腺炎，LIP正常是第一个红灯，尿AMY正常是第二个红灯，AcCR<1%或PEG沉淀是确诊的锤子。</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="bottom-nav">
+    <button class="btn btn-outline" onclick="goTo(1)">← 上一页</button>
+    <div class="step-indicator"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+    <button class="btn btn-primary" onclick="goTo(3)">矛盾点 →</button>
+  </div>
+</div>
+
+<!-- ===== 3: 矛盾点 ===== -->
+<div class="section" id="sec3">
+  <div class="sec-title">⚡ 矛盾检验结果</div>
+  <div class="sec-desc">本例有4个容易被忽略的"矛盾点"。点击卡片，揭示每个矛盾背后的真相。</div>
+  <div class="contra-grid">
+    <div class="contra-card" onclick="revealContra(this)">
+      <div class="contra-q">⚡ 血AMY升高 vs LIP正常</div>
+      <div class="contra-hint">血AMY 475↑/534↑/400↑，但LIP始终正常（14-26）——急性胰腺炎时AMY和LIP不该同时异常吗？</div>
+      <div class="contra-reveal">点击揭示真相 ▼</div>
+      <div class="contra-answer">
+        <strong>急性胰腺炎时AMY和LIP通常同时升高，LIP对胰腺炎的阴性预测值接近100%。</strong><br><br>
+        AMY↑+LIP正常 → <strong>非胰腺来源</strong>，LIP正常是第一个"红灯"。LIP的器官特异性远高于AMY，LIP正常基本可以排除急性胰腺炎。
+      </div>
+    </div>
+    <div class="contra-card" onclick="revealContra(this)">
+      <div class="contra-q">⚡ 血AMY升高 vs 尿AMY正常</div>
+      <div class="contra-hint">血AMY高达534，但尿AMY仅284——血高尿正常，淀粉酶去哪了？</div>
+      <div class="contra-reveal">点击揭示真相 ▼</div>
+      <div class="contra-answer">
+        <strong>正常情况下，血AMY升高→超出肾阈值→大量排入尿液→尿AMY也升高。</strong><br><br>
+        血AMY↑+尿AMY正常 → AMY排不出去，<strong>不是产生多了，而是清除慢了</strong>。<br><br>
+        就像一条河，上游水涨了（血AMY高），但下游没水（尿AMY正常）——中间一定有"堵"。<strong>巨淀粉酶与免疫球蛋白结合形成>200kDa的大分子复合物，无法通过肾小球滤过，滞留血液中。</strong>
+      </div>
+    </div>
+    <div class="contra-card" onclick="revealContra(this)">
+      <div class="contra-q">⚡ 血AMY升高 vs 无腹痛</div>
+      <div class="contra-hint">血AMY持续升高，但三个患者均无典型胰腺炎腹痛——AMY升高不等于胰腺炎？</div>
+      <div class="contra-reveal">点击揭示真相 ▼</div>
+      <div class="contra-answer">
+        <strong>急性胰腺炎最核心的临床表现是腹痛</strong>，本例3个患者均无典型胰腺炎腹痛。<br><br>
+        无腹痛+AMY升高 → 需要考虑<strong>非胰腺炎原因</strong>。AMY升高还可见于腮腺炎、肠梗阻、巨淀粉酶血症、肿瘤异位分泌等。AMY升高只是"线索"，不是"诊断"。
+      </div>
+    </div>
+    <div class="contra-card" onclick="revealContra(this)">
+      <div class="contra-q">⚡ "胰腺炎" vs PEG沉淀后AMY正常</div>
+      <div class="contra-hint">案例2：PEG沉淀后AMY从344→16，活性下降>95%——"胰腺炎"的AMY怎么突然没了？</div>
+      <div class="contra-reveal">点击揭示真相 ▼</div>
+      <div class="contra-answer">
+        <strong>PEG使大分子蛋白质（巨AMY复合物）沉淀，正常淀粉酶不被沉淀。</strong><br><br>
+        沉淀后AMY活性下降>95% → 说明升高的不是"真正的淀粉酶"，而是<strong>"巨淀粉酶复合物"</strong>。PEG沉淀是巨淀粉酶血症的确诊试验之一。案例2中PEG沉淀后AMY从344→16，活性下降>95%，巨淀粉酶血症确诊。
+      </div>
+    </div>
+  </div>
+  <div class="card" style="border-color:var(--amber-border);background:var(--amber-bg);margin-top:8px;">
+    <div style="font-size:14px;font-weight:700;color:var(--amber);margin-bottom:6px;">💡 核心启示</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8;">矛盾结果不是"错误"，而是<strong style="color:var(--text)">真相的入口</strong>。检验人最该做的，不是看到矛盾就跳过，而是追问"为什么矛盾"——因为答案往往就藏在矛盾里。</div>
+  </div>
+  <div class="bottom-nav">
+    <button class="btn btn-outline" onclick="goTo(2)">← 上一页</button>
+    <div class="step-indicator"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+    <button class="btn btn-primary" onclick="goTo(4)">AcCR解读 →</button>
+  </div>
+</div>
+
+<!-- ===== 4: AcCR ===== -->
+<div class="section" id="sec4">
+  <div class="sec-title">📐 AcCR（淀粉酶肌酐清除率）交互解读</div>
+  <div class="sec-desc">拖动滑块，观察AcCR值和判读的变化。理解为什么AcCR是区分真假AMY升高的关键。</div>
+
+  <div class="ag-calc">
+    <div class="card ag-input-card">
+      <div class="ag-formula">AcCR = (尿AMY × 血Cr) / (血AMY × 尿Cr) × 100%</div>
+      <div class="ag-sliders">
+        <div class="ag-slider-row">
+          <label>尿AMY</label>
+          <input type="range" min="0" max="2000" value="284" step="1" oninput="updateAcCR()">
+          <span class="val" id="uAmyVal">284</span>
+        </div>
+        <div class="ag-slider-row">
+          <label>血Cr</label>
+          <input type="range" min="10" max="500" value="70" step="1" oninput="updateAcCR()">
+          <span class="val" id="scrVal">70</span>
+        </div>
+        <div class="ag-slider-row">
+          <label>血AMY</label>
+          <input type="range" min="10" max="2000" value="534" step="1" oninput="updateAcCR()">
+          <span class="val" id="sAmyVal">534</span>
+        </div>
+        <div class="ag-slider-row">
+          <label>尿Cr</label>
+          <input type="range" min="100" max="30000" value="13120" step="10" oninput="updateAcCR()">
+          <span class="val" id="ucrVal">13120</span>
+        </div>
+      </div>
+      <div class="ag-result ag-low" id="accrResult">
+        <div class="ag-val" id="accrVal">0.28%</div>
+        <div class="ag-label" id="accrLabel">AcCR<1% → 巨淀粉酶血症（清除减慢）</div>
+      </div>
+    </div>
+
+    <div class="card ag-input-card">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px;">🧪 本例 vs 急性胰腺炎</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.7;">点击下方按钮，对比两种情况的AcCR差异：</div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:8px;" onclick="setMacro()">本例：巨淀粉酶血症</button>
+      <button class="btn btn-outline" style="width:100%;margin-bottom:16px;" onclick="setPancreatitis()">急性胰腺炎</button>
+      <div id="accrExplain" style="font-size:13px;color:var(--text2);line-height:1.8;padding:12px;background:#F9F9FB;border-radius:10px;">
+        <strong style="color:var(--purple)">本例</strong>：巨AMY复合物无法滤过 → 尿AMY低 → AcCR极低 → <strong style="color:var(--text)">指向巨淀粉酶血症</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="ag-compare">
+    <div class="ag-type ag-type-low">
+      <h3 style="color:var(--purple)">🟣 AcCR<1% ← 本例</h3>
+      <div class="arrow">血AMY 534↑ + 尿AMY 284 → <strong style="color:var(--purple)">AcCR 0.28%</strong></div>
+      <p>巨AMY复合物无法通过肾小球滤过<br>滞留血液中→血AMY高→尿AMY正常<br>→ <strong>清除减慢</strong>（巨淀粉酶血症）</p>
+    </div>
+    <div class="ag-type ag-type-high">
+      <h3 style="color:var(--red)">🔴 AcCR>4%</h3>
+      <div class="arrow">血AMY 800↑ + 尿AMY 5000↑ → <strong style="color:var(--red)">AcCR 6.5%</strong></div>
+      <p>AMY从胰腺大量释放入血<br>超出肾阈值→大量排入尿液<br>→ <strong>清除增加</strong>（急性胰腺炎）</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;border-color:var(--purple-border);background:var(--purple-bg);">
+    <div style="font-size:14px;font-weight:700;color:var(--purple);margin-bottom:6px;">💡 一句话总结</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8;"><strong style="color:var(--text)">AcCR不是"可有可无"的指标，而是区分真假AMY升高的关键开关。</strong>AcCR<1%直接把诊断方向从"产生过多"切换到"清除减慢"——指向巨淀粉酶血症。就像AG把代酸分为"产酸型"和"丢碱型"一样，AcCR把AMY升高分为"真性升高"和"假性升高"。</div>
+  </div>
+
+  <div class="card" style="margin-top:16px;border-color:var(--blue-border);background:var(--blue-bg);">
+    <div style="font-size:14px;font-weight:700;color:var(--blue);margin-bottom:8px;">📚 额外知识点：淀粉酶同工酶与肿瘤异位分泌</div>
+    <div style="font-size:13px;color:var(--text2);line-height:2;">
+      <strong style="color:var(--text)">S型淀粉酶（~60%）：</strong>唾液腺、肺、汗腺、乳腺、胃肠道、泌尿生殖系统、某些肿瘤异位分泌<br>
+      <strong style="color:var(--text)">P型淀粉酶（~40%）：</strong>主要胰腺，具有器官特异性<br>
+      <strong style="color:var(--amber)">肿瘤异位分泌淀粉酶：</strong>最常见卵巢癌、肺癌、多发性骨髓瘤，多为S型升高，治疗有效→AMY下降、复发→AMY重新升高
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="btn btn-outline" onclick="goTo(3)">← 上一页</button>
+    <div class="step-indicator"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+    <button class="btn btn-primary" onclick="goTo(5)">诊断 →</button>
+  </div>
+</div>
+
+<!-- ===== 5: 诊断 ===== -->
+<div class="section" id="sec5">
+  <div class="sec-title">✅ 最终诊断</div>
+  <div class="sec-desc">所有证据汇聚于此——血AMY升高不等于胰腺炎，巨淀粉酶血症才是真相。</div>
+
+  <div class="dx-final">
+    <div class="label">▎核心诊断</div>
+    <h2>巨淀粉酶血症</h2>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:16px;">淀粉酶与免疫球蛋白结合形成大分子复合物，无法通过肾小球滤过</div>
+    <div class="dx-list">
+      <div class="dx-item"><div class="dx-dot" style="background:var(--blue);"></div><strong>案例1：50岁女性</strong> — AMY 475↑ + LIP正常 + 尿AMY正常</div>
+      <div class="dx-item"><div class="dx-dot" style="background:var(--purple);"></div><strong>案例2：68岁男性</strong> — AMY 534↑ + LIP正常 + AcCR 0.28% + PEG沉淀>95%</div>
+      <div class="dx-item"><div class="dx-dot" style="background:var(--amber);"></div><strong>案例3：肿瘤患者</strong> — AMY 400↑ + LIP正常 + 无胰腺炎表现</div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--green-border);background:var(--green-bg);">
+    <div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:6px;">✅ 排除诊断</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8;">
+      <strong style="color:var(--text)">急性胰腺炎</strong> — LIP正常（阴性预测值接近100%）、无腹痛<br>
+      <strong style="color:var(--text)">腮腺炎</strong> — 尿AMY正常、无腮腺肿大<br>
+      <strong style="color:var(--text)">肿瘤异位分泌</strong> — 无肿瘤证据（案例2虽有肝细胞癌但为巨AMY型）
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--amber-border);background:var(--amber-bg);">
+    <div style="font-size:14px;font-weight:700;color:var(--amber);margin-bottom:8px;">💭 教训</div>
+    <div style="font-size:14px;color:var(--text2);line-height:2;">
+      AMY升高不等于胰腺炎，<strong style="color:var(--text)">LIP正常是第一个红灯</strong>，<strong style="color:var(--text)">尿AMY正常是第二个红灯</strong>，<strong style="color:var(--text)">AcCR<1%或PEG沉淀是确诊的锤子</strong>。<br>
+      三个患者都曾被怀疑胰腺炎，甚至被转诊到胰腺外科——但如果早一步查尿AMY和AcCR，就能避免不必要的检查和焦虑。<br><br>
+      <strong style="color:var(--amber)">检验人不应只做"数字搬运工"，而应成为临床诊断的"解码者"。</strong><br>
+      <strong style="color:var(--red)">血AMY升高 + 尿AMY正常 = 不是产生多了，而是清除慢了。</strong>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--purple-border);background:var(--purple-bg);">
+    <div style="font-size:14px;font-weight:700;color:var(--purple);margin-bottom:8px;">🧩 思维共振：与范可尼综合征案例的对比</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8;">
+      <table class="compare-table">
+        <thead><tr><th>维度</th><th>范可尼综合征</th><th>巨淀粉酶血症</th></tr></thead>
+        <tbody>
+          <tr><td><strong style="color:var(--text)">核心矛盾</strong></td><td>血磷低 + 尿磷不低</td><td>血AMY高 + 尿AMY正常</td></tr>
+          <tr><td><strong style="color:var(--text)">矛盾本质</strong></td><td>该重吸收的没保住（漏了）</td><td>该排出去的没排掉（堵了）</td></tr>
+          <tr><td><strong style="color:var(--text)">关键指标</strong></td><td>24h尿磷 + AG</td><td>尿AMY + AcCR</td></tr>
+          <tr><td><strong style="color:var(--text)">确诊工具</strong></td><td>尿低分子蛋白（β₂-MG）</td><td>AcCR + PEG沉淀</td></tr>
+          <tr><td><strong style="color:var(--text)">思维方法</strong></td><td>参考范围是统计学的，不是病理生理学的</td><td>血高尿正常 = 不是产生多了，而是清除慢了</td></tr>
+          <tr><td><strong style="color:var(--text)">共同教训</strong></td><td colspan="2" style="color:var(--text);">矛盾结果不是"错误"，而是真相的入口</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="btn btn-outline" onclick="goTo(4)">← 上一页</button>
+    <div class="step-indicator"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div><div class="step-dot"></div></div>
+    <button class="btn btn-primary" onclick="goTo(6)">测验 →</button>
+  </div>
+</div>
+
+<!-- ===== 6: 测验 ===== -->
+<div class="section" id="sec6">
+  <div class="sec-title">📝 巩固测验</div>
+  <div class="sec-desc">5道题，检验你对本案例关键知识点的掌握程度。选择后点击选项即可。</div>
+
+  <div class="quiz-card card" id="q1">
+    <div class="quiz-q"><span class="qnum">Q1</span>血AMY升高，但LIP正常，最可能的判断是？</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answer(this,'q1',false)"><span class="opt-letter">A</span>检验误差，AMY结果不可靠</div>
+      <div class="quiz-opt" onclick="answer(this,'q1',true)"><span class="opt-letter">B</span>非胰腺来源的AMY升高，LIP正常是排除胰腺炎的重要依据</div>
+      <div class="quiz-opt" onclick="answer(this,'q1',false)"><span class="opt-letter">C</span>轻度胰腺炎，LIP尚未升高</div>
+      <div class="quiz-opt" onclick="answer(this,'q1',false)"><span class="opt-letter">D</span>腮腺炎导致的AMY升高</div>
+    </div>
+    <div class="quiz-explain">✅ <strong>LIP对急性胰腺炎的阴性预测值接近100%。</strong>AMY↑+LIP正常 → 非胰腺来源的可能性大，LIP正常是第一个"红灯"。腮腺炎时AMY升高但尿AMY也升高，不会出现尿AMY正常。</div>
+  </div>
+
+  <div class="quiz-card card" id="q2">
+    <div class="quiz-q"><span class="qnum">Q2</span>血AMY升高但尿AMY正常，提示的机制是？</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answer(this,'q2',false)"><span class="opt-letter">A</span>淀粉酶来源增加，溢入尿液</div>
+      <div class="quiz-opt" onclick="answer(this,'q2',false)"><span class="opt-letter">B</span>肾脏对淀粉酶清除率增加</div>
+      <div class="quiz-opt" onclick="answer(this,'q2',true)"><span class="opt-letter">C</span>淀粉酶清除减慢，大分子无法滤过（如巨淀粉酶血症）</div>
+      <div class="quiz-opt" onclick="answer(this,'q2',false)"><span class="opt-letter">D</span>肾功能不全导致淀粉酶蓄积</div>
+    </div>
+    <div class="quiz-explain">✅ <strong>血AMY↑+尿AMY正常 = AMY排不出去。</strong>巨淀粉酶与免疫球蛋白结合形成大分子复合物（>200kDa），无法通过肾小球滤过，滞留血液中。不是产生多了，而是清除慢了。</div>
+  </div>
+
+  <div class="quiz-card card" id="q3">
+    <div class="quiz-q"><span class="qnum">Q3</span>AcCR（淀粉酶肌酐清除率）<1%，提示的诊断是？</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answer(this,'q3',false)"><span class="opt-letter">A</span>急性胰腺炎</div>
+      <div class="quiz-opt" onclick="answer(this,'q3',false)"><span class="opt-letter">B</span>正常</div>
+      <div class="quiz-opt" onclick="answer(this,'q3',true)"><span class="opt-letter">C</span>巨淀粉酶血症</div>
+      <div class="quiz-opt" onclick="answer(this,'q3',false)"><span class="opt-letter">D</span>腮腺炎</div>
+    </div>
+    <div class="quiz-explain">✅ <strong>AcCR正常值1%-4%，急性胰腺炎>4%（肾脏清除增加），巨淀粉酶血症<1%（巨AMY无法滤过，清除率极低）。</strong>AcCR<1%是巨淀粉酶血症的量化诊断标准。</div>
+  </div>
+
+  <div class="quiz-card card" id="q4">
+    <div class="quiz-q"><span class="qnum">Q4</span>以下哪种肿瘤最常引起异位分泌淀粉酶（S型升高）？</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answer(this,'q4',false)"><span class="opt-letter">A</span>肝细胞癌</div>
+      <div class="quiz-opt" onclick="answer(this,'q4',true)"><span class="opt-letter">B</span>卵巢癌</div>
+      <div class="quiz-opt" onclick="answer(this,'q4',false)"><span class="opt-letter">C</span>胰腺癌</div>
+      <div class="quiz-opt" onclick="answer(this,'q4',false)"><span class="opt-letter">D</span>前列腺癌</div>
+    </div>
+    <div class="quiz-explain">✅ <strong>卵巢癌、支气管肺癌、多发性骨髓瘤是最常引起高淀粉酶血症的肿瘤</strong>，绝大多数为S-淀粉酶升高。肿瘤组织异位合成淀粉酶（AMY1基因过度表达），治疗后AMY下降，复发后重新升高，可作为肿瘤标志物。</div>
+  </div>
+
+  <div class="quiz-card card" id="q5">
+    <div class="quiz-q"><span class="qnum">Q5</span>PEG沉淀试验判断巨淀粉酶血症的标准是？</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answer(this,'q5',false)"><span class="opt-letter">A</span>沉淀后AMY活性下降>30%</div>
+      <div class="quiz-opt" onclick="answer(this,'q5',true)"><span class="opt-letter">B</span>沉淀后AMY活性下降>60%</div>
+      <div class="quiz-opt" onclick="answer(this,'q5',false)"><span class="opt-letter">C</span>沉淀后AMY活性不变</div>
+      <div class="quiz-opt" onclick="answer(this,'q5',false)"><span class="opt-letter">D</span>沉淀后AMY活性升高</div>
+    </div>
+    <div class="quiz-explain">✅ <strong>PEG使大分子蛋白质（巨AMY复合物）沉淀，正常淀粉酶不被沉淀。</strong>沉淀后AMY活性下降>60%支持巨淀粉酶血症诊断。案例2中PEG沉淀后AMY从344→16，活性下降>95%。</div>
+  </div>
+
+  <div class="score-card" id="scoreCard" style="display:none;">
+    <div style="font-size:16px;font-weight:700;margin-bottom:8px;">🎉 测验结果</div>
+    <div class="score-num" id="scoreNum">0</div>
+    <div class="score-label">/ 5 题正确</div>
+    <div style="margin-top:16px;"><button class="btn btn-outline" onclick="resetQuiz()">重新测验</button></div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="btn btn-outline" onclick="goTo(5)">← 上一页</button>
+    <div class="step-indicator"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div></div>
+    <button class="btn btn-primary" onclick="goTo(0)">返回首页</button>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ===== 浮动工具 ===== -->
+<div class="float-tools">
+  <button class="float-btn" title="分析逻辑图（L）" onclick="openLogic()">🧭</button>
+  <button class="float-btn" title="我的笔记（N）" onclick="openNotes()">📝</button>
+  <button class="float-btn" title="复制要点速记" onclick="copySummary()">📋</button>
+  <button class="float-btn" title="导出 / 打印 PDF" onclick="window.print()">📤</button>
+</div>
+<div class="kbd-tip"><b>← →</b> 翻页 · <b>L</b> 逻辑图 · <b>N</b> 笔记 · <b>Esc</b> 关闭</div>
+
+<!-- ===== 逻辑图弹窗 ===== -->
+<div class="modal-mask" id="logicModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeLogic()">×</button>
+    <h2>🧭 分析逻辑主线</h2>
+    <div class="sec-desc">把散落在「证据链 / 矛盾点 / 诊断」里的推理，串成一条完整思考链。每学完一章，回来对照一遍，记忆更牢。</div>
+
+    <div class="logic-flow">
+      <div class="lf-step">
+        <div class="lf-left"><div class="lf-num" style="background:var(--blue);">1</div><div class="lf-line"></div></div>
+        <div class="lf-card">
+          <h4>起点：血AMY升高<span class="tag" style="background:var(--blue-bg);color:var(--blue);">现象</span></h4>
+          <p>三个患者血AMY均升高（475/534/400），都曾被怀疑胰腺炎。但 <b>AMY升高 ≠ 胰腺炎</b>，AMY还可见于腮腺炎、肠梗阻、巨淀粉酶血症、肿瘤异位分泌等。AMY升高只是"线索"，不是"诊断"。</p>
+        </div>
+      </div>
+      <div class="lf-step">
+        <div class="lf-left"><div class="lf-num" style="background:var(--amber);">2</div><div class="lf-line"></div></div>
+        <div class="lf-card">
+          <h4>第一个红灯：LIP正常<span class="tag" style="background:var(--amber-bg);color:var(--amber);">排除胰腺炎</span></h4>
+          <p>急性胰腺炎时AMY和LIP通常同时升高，<b>LIP对胰腺炎的阴性预测值接近100%</b>。三个案例AMY↑+LIP正常 → 非胰腺来源。LIP正常是第一个"红灯"。</p>
+        </div>
+      </div>
+      <div class="lf-step">
+        <div class="lf-left"><div class="lf-num" style="background:var(--red);">3</div><div class="lf-line"></div></div>
+        <div class="lf-card">
+          <h4>第二个红灯：尿AMY正常<span class="tag" style="background:var(--red-bg);color:var(--red);">清除减慢</span></h4>
+          <p>血AMY↑+尿AMY↑ = 真性升高（来源增加）。血AMY↑+尿AMY正常 = 假性升高（清除减慢）。<b>血高尿正常 = AMY排不出去</b>，不是产生多了，而是清除慢了。就像一条河，上游水涨了，但下游没水——中间一定有"堵"。</p>
+        </div>
+      </div>
+      <div class="lf-step">
+        <div class="lf-left"><div class="lf-num" style="background:var(--purple);">4</div><div class="lf-line"></div></div>
+        <div class="lf-card">
+          <h4>量化诊断：AcCR<1%<span class="tag" style="background:var(--purple-bg);color:var(--purple);">确诊</span></h4>
+          <ul>
+            <li><b>AcCR公式</b>：(尿AMY×血Cr)/(血AMY×尿Cr)×100%</li>
+            <li><b>正常</b>：1%-4%</li>
+            <li><b>急性胰腺炎</b>：>4%（肾脏清除增加）</li>
+            <li><b>巨淀粉酶血症</b>：<1%（巨AMY无法滤过）</li>
+            <li><b>案例2</b>：AcCR ≈ 0.28%，远低于1%阈值</li>
+          </ul>
+        </div>
+      </div>
+      <div class="lf-step">
+        <div class="lf-left"><div class="lf-num" style="background:var(--green);">5</div><div class="lf-line"></div></div>
+        <div class="lf-card">
+          <h4>确诊锤子：PEG沉淀<span class="tag" style="background:var(--green-bg);color:var(--green);">验证</span></h4>
+          <p>PEG使大分子蛋白质（巨AMY复合物）沉淀。案例2：PEG沉淀后AMY从344→16，活性下降>95% → 升高的不是"真正的淀粉酶"，而是"巨淀粉酶复合物"。</p>
+        </div>
+      </div>
+      <div class="lf-step">
+        <div class="lf-left"><div class="lf-num" style="background:var(--amber);">6</div><div class="lf-line"></div></div>
+        <div class="lf-card">
+          <h4>排除鉴别诊断<span class="tag" style="background:var(--amber-bg);color:var(--amber);">去伪</span></h4>
+          <p>胰腺炎（LIP正常、无腹痛）→ 排除。腮腺炎（尿AMY正常、无腮腺肿大）→ 排除。肿瘤异位分泌（多为S型升高、尿AMY升高）→ 排除。<b>三个"排除"指向同一个方向：巨淀粉酶血症。</b></p>
+        </div>
+      </div>
+      <div class="lf-step">
+        <div class="lf-left"><div class="lf-num" style="background:var(--blue);">7</div></div>
+        <div class="lf-card">
+          <h4>真相：巨淀粉酶血症<span class="tag" style="background:var(--blue-bg);color:var(--blue);">闭环</span></h4>
+          <p>淀粉酶与免疫球蛋白(IgG/IgA)结合形成大分子复合物（>200kDa），无法通过肾小球滤过 → 滞留血液 → 血AMY高 → 尿AMY正常。<strong style="color:var(--amber)">AMY升高不等于胰腺炎</strong>——LIP正常是第一个红灯，尿AMY正常是第二个红灯，AcCR<1%或PEG沉淀是确诊的锤子。</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-size:18px;font-weight:800;margin:28px 0 4px;">📊 关键数据速查表</h3>
+    <div class="sec-desc">把「结果 — 参考 — 含义」放一起，是复习与记忆的核心抓手。</div>
+    <table class="data-table">
+      <thead><tr><th>指标</th><th>结果</th><th>参考</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>血AMY（案例1）</td><td>475↑</td><td>25-125</td><td>升高</td></tr>
+        <tr><td>血AMY（案例2）</td><td>344→534→419↑</td><td>25-125</td><td>持续升高</td></tr>
+        <tr><td>血AMY（案例3）</td><td>353→400↑</td><td>25-125</td><td>升高</td></tr>
+        <tr><td>LIP（案例1）</td><td>26</td><td>0-60</td><td>正常，排除胰腺炎</td></tr>
+        <tr><td>LIP（案例2）</td><td>14-18</td><td>0-60</td><td>持续正常</td></tr>
+        <tr><td>尿AMY（案例1）</td><td>多次正常</td><td>↑</td><td>血高尿正常 = 清除减慢</td></tr>
+        <tr><td>尿AMY/肌酐（案例2）</td><td>21.65</td><td>8.3-53.8</td><td>正常范围，但血AMY↑时尿AMY应↑</td></tr>
+        <tr><td>AcCR（案例2）</td><td>0.28%</td><td>1%-4%</td><td><1% → 巨淀粉酶血症</td></tr>
+        <tr><td>PEG沉淀（案例2）</td><td>344→16</td><td>下降>60%</td><td>下降>95% → 巨AMY确诊</td></tr>
+      </tbody>
+    </table>
+
+    <div class="card" style="margin-top:24px;border-color:var(--blue-border);background:var(--blue-bg);">
+      <div style="font-size:14px;font-weight:700;color:var(--blue);margin-bottom:6px;">🧩 一句话推理</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.9;">看到 <b style="color:var(--text)">血AMY升高</b> 别只想着「胰腺炎」 → 先看 <b style="color:var(--text)">LIP</b>（正常 = 非胰腺来源）→ 再看 <b style="color:var(--text)">尿AMY</b>（正常 = 清除减慢）→ 算 <b style="color:var(--text)">AcCR</b>（<1% = 巨淀粉酶血症）→ 做 <b style="color:var(--text)">PEG沉淀</b>（下降>60% = 确诊）→ <b style="color:var(--text)">巨淀粉酶血症</b>。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 笔记抽屉 ===== -->
+<div class="notes-drawer" id="notesDrawer">
+  <div class="notes-head">
+    <h3>📝 我的学习笔记</h3>
+    <button class="modal-close" onclick="openNotes()">×</button>
+  </div>
+  <div class="notes-body">
+    <div class="notes-label">当前章节</div>
+    <div id="notesSectionName" style="font-size:13px;color:var(--blue);font-weight:700;margin-bottom:8px;">首页</div>
+    <textarea id="notesInput" placeholder="写下你对本案例的分析思路、易错点、联想记忆……（自动保存到本机）"></textarea>
+    <div class="notes-label">全局笔记</div>
+    <textarea id="notesGlobal" placeholder="跨章节的总结、口诀、复习计划……"></textarea>
+    <div class="notes-hint">笔记保存在本机浏览器（localStorage），仅你自己可见，关闭页面不丢失。点右下角 📤 可导出为 txt，或配合「复制要点速记」做 Anki 卡片。</div>
+  </div>
+  <div class="notes-foot">
+    <button class="btn btn-primary" style="flex:1;" onclick="exportNotes()">导出笔记</button>
+    <button class="btn btn-outline" onclick="clearNotes()">清空</button>
+  </div>
+</div>
+
+<script>
+// ===== 导航 =====
+function goTo(n) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec' + n).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === n));
+  markVisited(n);
+  if (document.getElementById('notesDrawer').classList.contains('show')) syncNotes();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ===== 证据链展开 =====
+function toggleEv(el) {
+  const body = el.nextElementSibling;
+  const isOpen = el.classList.contains('open');
+  el.classList.toggle('open', !isOpen);
+  body.classList.toggle('show', !isOpen);
+}
+
+// ===== 矛盾点揭示 =====
+function revealContra(el) {
+  const answer = el.querySelector('.contra-answer');
+  const reveal = el.querySelector('.contra-reveal');
+  if (!answer.classList.contains('show')) {
+    answer.classList.add('show');
+    el.classList.add('revealed');
+    reveal.textContent = '✅ 已揭示';
+  }
+}
+
+// ===== AcCR计算器 =====
+function updateAcCR() {
+  const uAmy = parseFloat(document.querySelectorAll('input[type=range]')[0].value);
+  const scr = parseFloat(document.querySelectorAll('input[type=range]')[1].value);
+  const sAmy = parseFloat(document.querySelectorAll('input[type=range]')[2].value);
+  const ucr = parseFloat(document.querySelectorAll('input[type=range]')[3].value);
+  document.getElementById('uAmyVal').textContent = uAmy.toFixed(0);
+  document.getElementById('scrVal').textContent = scr.toFixed(0);
+  document.getElementById('sAmyVal').textContent = sAmy.toFixed(0);
+  document.getElementById('ucrVal').textContent = ucr.toFixed(0);
+  const accr = (uAmy * scr) / (sAmy * ucr) * 100;
+  const result = document.getElementById('accrResult');
+  const accrVal = document.getElementById('accrVal');
+  const accrLabel = document.getElementById('accrLabel');
+  accrVal.textContent = accr.toFixed(2) + '%';
+  if (accr < 1) {
+    result.className = 'ag-result ag-low';
+    accrLabel.textContent = 'AcCR<1% → 巨淀粉酶血症（清除减慢）';
+  } else if (accr <= 4) {
+    result.className = 'ag-result ag-normal';
+    accrLabel.textContent = 'AcCR 1%-4% → 正常范围';
+  } else {
+    result.className = 'ag-result ag-high';
+    accrLabel.textContent = 'AcCR>4% → 急性胰腺炎（清除增加）';
+  }
+}
+
+function setMacro() {
+  const sliders = document.querySelectorAll('input[type=range]');
+  sliders[0].value = 284;
+  sliders[1].value = 70;
+  sliders[2].value = 534;
+  sliders[3].value = 13120;
+  updateAcCR();
+  document.getElementById('accrExplain').innerHTML = '<strong style="color:var(--purple)">本例</strong>：巨AMY复合物无法滤过 → 尿AMY低 → AcCR极低 → <strong style="color:var(--text)">指向巨淀粉酶血症</strong>';
+}
+
+function setPancreatitis() {
+  const sliders = document.querySelectorAll('input[type=range]');
+  sliders[0].value = 5000;
+  sliders[1].value = 80;
+  sliders[2].value = 800;
+  sliders[3].value = 8000;
+  updateAcCR();
+  document.getElementById('accrExplain').innerHTML = '<strong style="color:var(--red)">急性胰腺炎</strong>：AMY从胰腺大量释放入血 → 超出肾阈值 → 大量排入尿液 → AcCR升高 → <strong style="color:var(--text)">指向急性胰腺炎</strong>';
+}
+
+// ===== 测验 =====
+let quizScore = 0;
+let answered = {};
+
+const correctAnswers = {
+  'q1': 1, // B
+  'q2': 2, // C
+  'q3': 2, // C
+  'q4': 1, // B
+  'q5': 1  // B
+};
+
+function answer(el, qid, correct) {
+  if (answered[qid]) return;
+  answered[qid] = true;
+  const parent = document.getElementById(qid);
+  const opts = parent.querySelectorAll('.quiz-opt');
+  opts.forEach(o => {
+    o.classList.add('disabled');
+  });
+  if (el && correct) { el.classList.add('correct'); }
+  if (el && !correct) { el.classList.add('wrong'); }
+  // highlight correct answer
+  if (!correct) {
+    const correctIdx = correctAnswers[qid];
+    if (correctIdx !== undefined) {
+      opts[correctIdx].classList.add('correct');
+    }
+  }
+  if (!correct) { let w = JSON.parse(localStorage.getItem('case_wrong_m') || '[]'); if (!w.includes(qid)) { w.push(qid); try{localStorage.setItem('case_wrong_m', JSON.stringify(w));}catch(e){} } }
+  if (correct) quizScore++;
+  parent.querySelector('.quiz-explain').classList.add('show');
+  // check if all answered
+  if (Object.keys(answered).length === 5) {
+    setTimeout(() => {
+      const sc = document.getElementById('scoreCard');
+      sc.style.display = 'block';
+      document.getElementById('scoreNum').textContent = quizScore;
+      sc.scrollIntoView({behavior: 'smooth'});
+    }, 600);
+  }
+}
+
+function resetQuiz() {
+  quizScore = 0;
+  answered = {};
+  document.querySelectorAll('.quiz-opt').forEach(o => {
+    o.classList.remove('correct', 'wrong', 'disabled');
+  });
+  document.querySelectorAll('.quiz-explain').forEach(e => e.classList.remove('show'));
+  document.getElementById('scoreCard').style.display = 'none';
+}
+
+// ===== 进度持久化 =====
+const SECTION_NAMES = ['首页','病史','证据链','矛盾点','AcCR','诊断','测验'];
+let visited = [];
+try { visited = JSON.parse(localStorage.getItem('case_visited_m') || '[]'); } catch(e) { visited = []; }
+function markVisited(n){
+  if(!visited.includes(n)){ visited.push(n); try{localStorage.setItem('case_visited_m',JSON.stringify(visited));}catch(e){} }
+  updateProgress();
+}
+function updateProgress(){
+  const pct = Math.round(visited.length / SECTION_NAMES.length * 100);
+  const f = document.getElementById('progressFill');
+  if(f) f.style.width = pct + '%';
+}
+
+// ===== 逻辑图弹窗 =====
+function openLogic(){ document.getElementById('logicModal').classList.add('show'); }
+function closeLogic(){ document.getElementById('logicModal').classList.remove('show'); }
+
+// ===== 笔记抽屉 =====
+let currentSec = 0;
+function openNotes(){ const d = document.getElementById('notesDrawer'); const open = d.classList.toggle('show'); if(open) syncNotes(); }
+function syncNotes(){
+  const secs = [...document.querySelectorAll('.section')];
+  currentSec = secs.findIndex(s => s.classList.contains('active'));
+  if(currentSec < 0) currentSec = 0;
+  document.getElementById('notesSectionName').textContent = SECTION_NAMES[currentSec] || '首页';
+  let all = {}; try { all = JSON.parse(localStorage.getItem('case_notes_m') || '{}'); } catch(e){}
+  document.getElementById('notesInput').value = all['sec' + currentSec] || '';
+  document.getElementById('notesGlobal').value = all.global || '';
+}
+function saveNotes(){
+  let all = {}; try { all = JSON.parse(localStorage.getItem('case_notes_m') || '{}'); } catch(e){}
+  all['sec' + currentSec] = document.getElementById('notesInput').value;
+  all.global = document.getElementById('notesGlobal').value;
+  try { localStorage.setItem('case_notes_m', JSON.stringify(all)); } catch(e){}
+}
+function exportNotes(){
+  let all = {}; try { all = JSON.parse(localStorage.getItem('case_notes_m') || '{}'); } catch(e){}
+  let txt = '【巨淀粉酶血症——如何识别真假AMY升高 · 我的学习笔记】\n\n';
+  SECTION_NAMES.forEach((name, i) => { if(all['sec' + i]) txt += '■ ' + name + '\n' + all['sec' + i] + '\n\n'; });
+  if(all.global) txt += '■ 全局笔记\n' + all.global + '\n';
+  const w = JSON.parse(localStorage.getItem('case_wrong_m') || '[]');
+  if(w.length) txt += '■ 我的错题：' + w.map(id => id.replace('q','Q')).join('、') + '\n';
+  const blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '巨淀粉酶血症案例学习笔记.txt'; a.click();
+}
+function clearNotes(){ if(confirm('确定清空所有笔记？此操作不可恢复。')){ try{localStorage.removeItem('case_notes_m');}catch(e){} syncNotes(); } }
+
+// ===== 要点速记复制 =====
+function copyText(t){
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(t).then(()=>toast('要点已复制，可粘贴到笔记 / Anki')).catch(()=>fallbackCopy(t));
+  } else { fallbackCopy(t); }
+}
+function fallbackCopy(t){ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');toast('要点已复制');}catch(e){toast('复制失败，请手动选择');} ta.remove(); }
+function copySummary(){
+  const t = `【巨淀粉酶血症 · 核心要点】
+1) 本质：淀粉酶与免疫球蛋白(IgG/IgA)结合形成大分子复合物(>200kDa)，无法通过肾小球滤过。
+2) AMY↑+LIP正常 → 非胰腺来源，LIP正常是第一个"红灯"（阴性预测值接近100%）。
+3) 血AMY↑+尿AMY正常 → 清除减慢，不是产生多了，而是清除慢了。
+4) AcCR = (尿AMY×血Cr)/(血AMY×尿Cr)×100%。正常1%-4%，>4%胰腺炎，<1%巨淀粉酶血症。
+5) PEG沉淀后AMY活性下降>60%支持巨淀粉酶血症（案例2下降>95%）。
+6) 排除：胰腺炎（LIP正常）、腮腺炎（尿AMY正常）、肿瘤异位分泌（S型升高、尿AMY↑）。
+7) 肿瘤异位分泌淀粉酶：最常见卵巢癌、肺癌、多发性骨髓瘤，多为S型升高。
+8) S型淀粉酶(~60%)：唾液腺、肺等；P型淀粉酶(~40%)：主要胰腺。
+口诀：血高尿低非胰腺，LIP正常是红灯；AcCR<1%巨AMY，PEG沉淀把锤钉。`;
+  copyText(t);
+}
+
+// ===== 轻提示 =====
+let toastTimer;
+function toast(msg){
+  let el = document.getElementById('toast');
+  if(!el){ el = document.createElement('div'); el.id='toast'; el.style.cssText='position:fixed;left:50%;top:72px;transform:translateX(-50%);background:var(--blue);color:#fff;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:600;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.4);opacity:0;transition:opacity .25s;'; document.body.appendChild(el); }
+  el.textContent = msg; el.style.opacity = '1'; clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ el.style.opacity='0'; }, 1900);
+}
+
+// ===== 键盘导航 =====
+document.addEventListener('keydown', e => {
+  if(e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+  if(e.key === 'Escape'){ closeLogic(); const nd = document.getElementById('notesDrawer'); if(nd.classList.contains('show')) openNotes(); return; }
+  const secs = [...document.querySelectorAll('.section')];
+  const cur = secs.findIndex(s => s.classList.contains('active'));
+  if(e.key === 'ArrowRight' && cur >= 0 && cur < secs.length - 1) goTo(cur + 1);
+  if(e.key === 'ArrowLeft' && cur > 0) goTo(cur - 1);
+  if(e.key.toLowerCase() === 'l') openLogic();
+  if(e.key.toLowerCase() === 'n') openNotes();
+});
+
+// 笔记实时保存 & 弹窗点击关闭
+document.getElementById('notesInput').addEventListener('input', saveNotes);
+document.getElementById('notesGlobal').addEventListener('input', saveNotes);
+document.getElementById('logicModal').addEventListener('click', e => { if(e.target.id === 'logicModal') closeLogic(); });
+
+// init
+updateAcCR();
+updateProgress();
+markVisited(0);
+</script>
+</body>
+</html>
