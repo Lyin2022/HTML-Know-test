@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>肾功能检验思维学习系统</title>
+<style>
+  :root{
+    --bg:#f4f6f8; --surface:#fff; --ink:#1b2530; --muted:#69757f; --line:#e6eaee;
+    --brand:#15727d; --brand-d:#0e5660; --brand-soft:#e8f1f2;
+    --warm:#b06a4f; --warm-soft:#f8ede8;
+    --neutral:#9aa4ac;
+    --radius:14px; --shadow:0 1px 2px rgba(20,30,40,.04),0 12px 30px rgba(20,30,40,.07);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased}
+  .skip{position:absolute;left:-999px;top:0;background:var(--brand);color:#fff;padding:10px 16px;border-radius:0 0 8px 0;z-index:99}
+  .skip:focus{left:12px;top:12px}
+
+  /* 顶部品牌条 */
+  .topbar{background:var(--surface);border-bottom:1px solid var(--line);padding:12px 18px;text-align:center}
+  .topbar b{color:var(--brand-d);font-weight:700;letter-spacing:.5px;font-size:.98rem}
+  .topbar span{display:block;font-size:.74rem;color:var(--muted);margin-top:1px}
+
+  main{max-width:920px;margin:0 auto;padding:22px 16px 110px}
+  .page{display:none}
+  .page.show{display:block;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h2.sec{font-size:1.12rem;font-weight:700;color:var(--brand-d);margin:6px 0 14px;padding-left:11px;border-left:4px solid var(--brand)}
+
+  /* ===== 首页 ===== */
+  .hero{background:linear-gradient(160deg,var(--brand),var(--brand-d));color:#fff;border-radius:20px;padding:38px 26px;text-align:center;box-shadow:var(--shadow)}
+  .hero-badge{display:inline-block;font-size:.74rem;letter-spacing:2px;background:rgba(255,255,255,.16);padding:5px 14px;border-radius:20px;margin-bottom:16px}
+  .hero h1{font-size:clamp(1.5rem,6vw,2.1rem);font-weight:800;line-height:1.3}
+  .hero-sub{margin:14px auto 24px;max-width:480px;font-size:.95rem;opacity:.92;line-height:1.8}
+  .cta{display:inline-block;background:#fff;color:var(--brand-d);border:none;border-radius:26px;padding:14px 34px;font-size:1.02rem;font-weight:700;cursor:pointer;transition:.2s;box-shadow:0 8px 20px rgba(0,0,0,.18)}
+  .cta:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,0,0,.24)}
+  .roadmap{margin-top:26px;display:flex;flex-direction:column;gap:12px}
+  .step{display:flex;gap:14px;align-items:flex-start;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;cursor:pointer;transition:.18s;box-shadow:var(--shadow)}
+  .step:hover{border-color:var(--brand);transform:translateY(-2px)}
+  .step-no{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--brand-soft);color:var(--brand-d);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+  .step h4{font-size:1rem;color:var(--ink);margin-bottom:3px}
+  .step p{font-size:.86rem;color:var(--muted);line-height:1.6}
+
+  .subtitle{color:var(--muted);font-size:.92rem;line-height:1.8;margin-bottom:14px}
+  .subtitle b{color:var(--ink)}
+
+  /* 关联度图例（无 emoji，靠色点区分） */
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 20px}
+  .leg{font-size:.82rem;padding:6px 13px;border-radius:20px;background:var(--surface);border:1px solid var(--line);color:var(--muted);display:flex;align-items:center;gap:7px}
+  .leg::before{content:"";width:9px;height:9px;border-radius:50%}
+  .leg-high::before{background:var(--brand)}
+  .leg-mid::before{background:#aab3ba}
+  .leg-low::before{background:#d7dde1}
+
+  /* ===== 指标卡片 ===== */
+  .metric{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:14px;box-shadow:var(--shadow);overflow:hidden}
+  .metric-head{padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;min-height:48px}
+  .metric-head .title-wrap{display:flex;align-items:center;gap:11px}
+  .metric-no{flex:0 0 auto;width:26px;height:26px;border-radius:7px;background:var(--brand-soft);color:var(--brand-d);font-weight:800;font-size:.82rem;display:flex;align-items:center;justify-content:center}
+  .metric-head h3{font-size:1.04rem;color:var(--brand-d);font-weight:700}
+  .badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .badge{font-size:.72rem;padding:4px 10px;border-radius:11px;font-weight:600;white-space:nowrap}
+  .b-organ{background:var(--brand-soft);color:var(--brand-d)}
+  .b-func{background:#eef1f4;color:#5a6470}
+  .asso{background:var(--brand);color:#fff}
+  .asso.mid{background:#eef1f4;color:#5a6470}
+  .asso.low{background:transparent;border:1px solid #d3dae0;color:var(--neutral)}
+  .toggle-hint{font-size:.78rem;color:#aab3ba;font-weight:500}
+  .metric-body{padding:0 18px 18px;border-top:1px solid var(--line);display:none}
+  .metric.open .metric-body{display:block;animation:fade .3s ease}
+
+  /* 卡片内嵌流程图 */
+  .fc{margin:14px 0 4px}
+  .fc-root{display:flex;justify-content:center;margin-bottom:0}
+  .fc-root .node{background:var(--brand-d);color:#fff;font-weight:700;padding:10px 20px;border-radius:11px;font-size:.95rem;box-shadow:var(--shadow)}
+  .fc-line{width:2px;height:16px;background:var(--line);margin:0 auto}
+  .fc-branches{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+  @media(max-width:600px){.fc-branches{grid-template-columns:1fr}}
+  .fc-branch{border:1px solid var(--line);border-radius:12px;padding:13px 13px 15px;background:#fbfcfd}
+  .fc-branch.prod{border-top:3px solid var(--warm)}
+  .fc-branch.excr{border-top:3px solid var(--brand)}
+  .fc-branch h4{font-size:.98rem;font-weight:700;letter-spacing:.3px}
+  .fc-branch.prod h4{color:var(--warm)} .fc-branch.excr h4{color:var(--brand-d)}
+  .fc-branch .bsub{font-size:.76rem;color:var(--muted);margin:3px 0 12px;line-height:1.55}
+  .fc-tree{position:relative;padding-left:13px}
+  .fc-tree::before{content:"";position:absolute;left:4px;top:2px;bottom:14px;width:2px;background:var(--line)}
+  .fc-node{position:relative;margin:9px 0;background:#fff;border:1px solid var(--line);border-left:3px solid var(--line);border-radius:9px;padding:10px 12px;cursor:pointer;transition:.18s;font-size:.88rem}
+  .fc-node::before{content:"";position:absolute;left:-9px;top:17px;width:9px;height:2px;background:var(--line)}
+  .fc-node:hover{box-shadow:0 2px 8px rgba(20,30,40,.08)}
+  .fc-node.lv-high{border-left-color:var(--brand)}
+  .fc-node.lv-mid{border-left-color:#aab3ba}
+  .fc-node.lv-low{border-left-color:#d7dde1}
+  .fc-node .nlabel{display:flex;align-items:center;gap:7px;font-weight:600;line-height:1.5}
+  .fc-node .ndir{font-weight:800;font-size:1.05rem;flex:0 0 auto}
+  .fc-node .ndir.up{color:var(--warm)} .fc-node .ndir.down{color:var(--brand)}
+  .fc-node .hint{font-size:.74rem;color:#aab3ba;margin-left:2px}
+  .fc-node .nlv{width:8px;height:8px;border-radius:50%;flex:0 0 auto;margin-left:auto}
+  .nlv.high{background:var(--brand)} .nlv.mid{background:#aab3ba} .nlv.low{background:#d7dde1}
+  .fc-detail{display:none;margin-top:9px;padding:9px 12px;background:#fbf7ef;border-left:3px solid #c9a227;border-radius:0 8px 8px 0;font-size:.83rem;color:#6b5a1e;line-height:1.75}
+  .fc-node.open .fc-detail{display:block;animation:fade .25s ease}
+  .insight{margin-top:12px;padding:12px 15px;background:var(--brand-soft);border-left:4px solid var(--brand);border-radius:8px;font-size:.88rem;line-height:1.8;color:var(--brand-d)}
+  .insight b{color:var(--brand-d)}
+
+  /* ===== 流程图 ===== */
+  .flow{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px 16px;box-shadow:var(--shadow);overflow-x:auto}
+  .fnode{border:2px solid var(--brand);border-radius:12px;padding:13px 16px;margin:10px auto;max-width:520px;text-align:center;background:var(--brand-soft);cursor:pointer;transition:.18s;font-size:.95rem;font-weight:600;color:var(--brand-d)}
+  .fnode:hover{background:#dcebee}
+  .fnode .fq{font-weight:700}
+  .fnode small{display:block;font-weight:400;opacity:.8;margin-top:3px}
+  .fbranch{display:flex;flex-direction:column;gap:10px;align-items:stretch;margin:8px 0}
+  @media(min-width:680px){.fbranch{flex-direction:row;justify-content:center;flex-wrap:wrap}}
+  .fbox{border-radius:12px;padding:13px 15px;background:#fff;border:2px solid #cfe2e5;cursor:pointer;transition:.18s;font-size:.9rem;flex:1 1 280px;max-width:340px}
+  .fbox:hover{box-shadow:0 4px 14px rgba(20,30,40,.12)}
+  .fbox h5{font-size:.98rem;font-weight:700;margin-bottom:4px}
+  .fbox .detail{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed #cdd8e0;font-size:.86rem;color:#566573;line-height:1.75}
+  .fbox.open .detail{display:block;animation:fade .25s ease}
+  .arrow{text-align:center;color:var(--brand);font-size:1.25rem;margin:2px 0;font-weight:700}
+  .warn{border-color:var(--warm);background:var(--warm-soft)}
+  .warn h5{color:var(--warm)}
+
+  /* ===== 总结表 ===== */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line);background:#fff;margin-bottom:8px}
+  table{width:100%;border-collapse:collapse;min-width:760px;font-size:.86rem}
+  caption{caption-side:top;text-align:left;font-size:.82rem;color:var(--muted);padding:0 2px 8px}
+  th{background:var(--brand-d);color:#fff;padding:13px 11px;text-align:left;font-weight:600;position:sticky;top:0}
+  td{padding:12px 11px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.7}
+  tbody tr:nth-child(even){background:#fafbfc}
+  tbody tr:hover td{background:var(--brand-soft)}
+  .up{color:var(--warm);font-weight:700}.down{color:var(--brand);font-weight:700}
+  tbody td:first-child,tbody th:first-child{position:sticky;left:0;background:#fff;font-weight:700;color:var(--brand-d);box-shadow:2px 0 4px rgba(20,30,40,.05);z-index:1}
+  tbody tr:nth-child(even) td:first-child{background:#fafbfc}
+  tbody tr:hover td:first-child{background:var(--brand-soft)}
+
+  .flash{padding:13px 16px;border-radius:10px;margin:10px 0;font-size:.9rem;line-height:1.8;background:var(--brand-soft);border-left:4px solid var(--brand);color:var(--brand-d)}
+  .flash b{color:var(--brand-d)}
+
+  /* ===== 测试 ===== */
+  .quiz-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px 18px;box-shadow:var(--shadow)}
+  .progress{height:8px;background:var(--brand-soft);border-radius:5px;overflow:hidden;margin-bottom:18px}
+  .progress-bar{height:100%;background:var(--brand);width:0;transition:.4s}
+  .score{font-size:2.1rem;text-align:center;color:var(--brand-d);font-weight:800;margin:18px 0}
+  .btn{display:inline-block;padding:12px 28px;background:var(--brand);color:#fff;border:none;border-radius:24px;cursor:pointer;font-size:1rem;font-weight:700;transition:.2s;min-height:46px}
+  .btn:hover{background:var(--brand-d)}
+  .flash.b{background:var(--warm-soft);border-left-color:var(--warm);color:#8a4a32}
+  .flash.g{background:var(--brand-soft);border-left-color:var(--brand);color:var(--brand-d)}
+  .opt-btn{display:block;width:100%;margin:10px 0;padding:14px 16px;border:2px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;text-align:left;transition:.18s;font-size:.95rem;min-height:50px;color:var(--ink)}
+  .opt-btn:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .opt-btn.correct{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-d);font-weight:600}
+  .opt-btn.wrong{border-color:var(--warm);background:var(--warm-soft);color:#8a4a32}
+  .opt-btn:disabled{cursor:default}
+
+  /* 题型切换 */
+  .qtype{display:flex;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:5px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .qtype-btn{flex:1;border:none;background:transparent;color:var(--muted);font-size:.92rem;font-weight:600;padding:11px 0;border-radius:9px;cursor:pointer;transition:.2s;min-height:44px}
+  .qtype-btn.active{background:var(--brand);color:#fff}
+  .hidden{display:none}
+
+  /* 填空题 */
+  .blank-list{display:flex;flex-direction:column;gap:14px}
+  .blank-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px;box-shadow:var(--shadow)}
+  .blank-card .bc-body{font-size:.97rem;line-height:2.15;color:var(--ink)}
+  .blank-card .bc-no{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--brand-soft);color:var(--brand-d);font-weight:800;font-size:.8rem;align-items:center;justify-content:center;margin-right:8px;vertical-align:middle}
+  .blank{display:inline-block;min-width:58px;padding:1px 10px;margin:0 2px;border:1px dashed var(--brand);border-radius:7px;background:#fff;color:var(--brand-d);font-size:.9rem;font-weight:600;cursor:pointer;transition:.18s;vertical-align:baseline;text-align:center}
+  .blank:hover{border-style:solid;background:var(--brand-soft)}
+  .blank.revealed{border-style:solid;background:var(--brand-soft);cursor:pointer}
+  .blank-tools{margin-top:13px;display:flex;gap:10px}
+  .btn-small{font-size:.84rem;padding:8px 16px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--brand-d);cursor:pointer;transition:.2s;min-height:38px;font-weight:600}
+  .btn-small:hover{border-color:var(--brand);background:var(--brand-soft)}
+
+  footer{text-align:center;color:#aab3ba;font-size:.78rem;padding:8px 16px 30px}
+
+  /* ===== 底部导航 ===== */
+  .bottom-nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(640px,100%);z-index:30;background:rgba(255,255,255,.96);backdrop-filter:saturate(160%) blur(10px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:7px 6px calc(7px + env(safe-area-inset-bottom))}
+  .bottom-nav button{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:.72rem;padding:5px 2px;transition:.2s}
+  .bottom-nav button svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .bottom-nav button.active{color:var(--brand)}
+
+  /* 版本徽标 + 更新日志 */
+  .ver-badge{position:fixed;top:10px;right:12px;z-index:40;background:rgba(21,114,125,.92);color:#fff;font-size:.72rem;font-weight:600;padding:4px 11px;border-radius:20px;letter-spacing:.3px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .changelog{max-width:920px;margin:0 auto;padding:8px 16px 30px}
+  .cl-list{list-style:none;font-size:.82rem;line-height:1.95;color:var(--muted)}
+  .cl-list li{padding-left:15px;position:relative;margin:5px 0}
+  .cl-list li::before{content:"";position:absolute;left:0;top:10px;width:6px;height:6px;border-radius:50%;background:var(--brand)}
+  .cl-list b{color:var(--brand-d)}
+</style>
+</head>
+<body>
+<a href="#main" class="skip">跳到主内容</a>
+<div class="ver-badge">v3 · 2026-08-19</div>
+
+<div class="topbar">
+  <b>肾功能检验思维</b>
+  <span>两维分析 · 部位定位 · 疾病关联</span>
+</div>
+
+<!-- 底部导航 -->
+<nav class="bottom-nav" aria-label="主导航">
+  <button class="active" onclick="go(0,this)" aria-label="首页">
+    <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>首页</button>
+  <button onclick="go(1,this)" aria-label="指标逻辑">
+    <svg viewBox="0 0 24 24"><path d="M9 3h6"/><path d="M10 3v6L5.5 19a1 1 0 0 0 .9 1.5h11.2A1 1 0 0 0 18.5 19L14 9V3"/><path d="M7.5 14h9"/></svg>指标</button>
+  <button onclick="go(2,this)" aria-label="定位流程">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a3 3 0 0 1 3 3v4.5"/></svg>流程</button>
+  <button onclick="go(3,this)" aria-label="总结总表">
+    <svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>总结</button>
+  <button onclick="go(4,this)" aria-label="分级测试">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>测试</button>
+</nav>
+
+<main id="main">
+
+  <!-- 首页 -->
+  <section class="page show" aria-label="首页">
+    <div class="hero">
+      <div class="hero-badge">学习系统</div>
+      <h1>肾功能检验<br>三维定位思维</h1>
+      <p class="hero-sub">从"产生端 vs 排泄端"两条链切入，逐层锁定病变部位与功能，把零散指标串成可执行的判读路径。</p>
+      <button class="cta" onclick="go(1)">开始学习 →</button>
+    </div>
+
+    <h2 class="sec">学习路径</h2>
+    <div class="roadmap">
+      <button class="step" onclick="go(1)">
+        <span class="step-no">1</span>
+        <div><h4>建立两维思维</h4><p>6 个核心指标，每个都从"排泄端 / 产生端"双向拆解，分清肾性异常与非肾来源改变。</p></div>
+      </button>
+      <button class="step" onclick="go(2)">
+        <span class="step-no">2</span>
+        <div><h4>三级定位流程</h4><p>产生端 → 肾前 / 肾性 / 肾后 → 肾小球 / 小管功能，逐级锁定病变。</p></div>
+      </button>
+      <button class="step" onclick="go(3)">
+        <span class="step-no">3</span>
+        <div><h4>自测巩固</h4><p>10 题分级测试（基础 → 机制 → 综合），即时判分与逐题解析。</p></div>
+      </button>
+    </div>
+  </section>
+
+  <!-- 指标逻辑 -->
+  <section class="page" aria-label="指标逻辑">
+    <h2 class="sec">核心框架：每个指标从两条链解释</h2>
+    <p class="subtitle">
+      <b>排泄端</b>：能不能顺利排出？排不出是肾前（血供不足）还是肾脏本身（哪个部位、哪项功能受损）？<br>
+      <b>产生端</b>：产生过多或不足——来自<b>非肾脏疾病或生理因素</b>（饮食、肌肉量、代谢、妊娠等）。这是<b>真实存在的指标改变</b>，并非"假象"，只是病变不在肾脏本身。<br>
+      每条目标注关联强度：<b>实心点</b>=高关联（直接指向肾病）/ <b>灰点</b>=中关联（需鉴别）/ <b>浅点</b>=低关联（多为生理/外因，非肾病变）。
+    </p>
+    <div class="legend">
+      <span class="leg leg-high">高关联 · 直接指向肾病</span>
+      <span class="leg leg-mid">中关联 · 需鉴别</span>
+      <span class="leg leg-low">低关联 · 生理/外因</span>
+    </div>
+    <p class="subtitle">💡 按序号依次学习；点击卡片头部展开流程图，点击流程节点查看机制。</p>
+    <div id="metrics"></div>
+  </section>
+
+  <!-- 定位流程 -->
+  <section class="page" aria-label="定位流程">
+    <h2 class="sec">三级定位流程图（点击节点展开）</h2>
+    <p class="subtitle">① 产生端（非肾/生理因素）正常吗 → ② 排不出堵在哪（肾前 / 肾性 / 肾后）→ ③ 肾脏哪个部位、哪项功能坏了。点击分支框展开疾病与机制。</p>
+    <div class="flow">
+      <div class="fnode"><span class="fq">任一肾功能指标异常</span></div>
+      <div class="arrow">↓</div>
+      <div class="fnode"><span class="fq">① 第一问：产生端（非肾/生理因素）正常吗？</span><small>摄入 · 代谢 · 合成 · 肌肉量</small></div>
+      <div class="fbranch">
+        <div class="fbox warn" onclick="this.classList.toggle('open')">
+          <h5>产生端改变（非肾/生理因素）</h5>
+          <div class="detail">肉食/运动→Scr↑；消瘦肌少→Scr↓（掩盖肾功能！）；高蛋白饮食/消化道出血→BUN↑；化疗细胞分解→UA↑；妊娠→eGFR↑。<br><b>这些是生理或非肾疾病的真实指标改变，并非假象；先识别来源，避免误判为肾病或漏诊肾性异常。</b></div>
+        </div>
+        <div class="fbox" onclick="this.classList.toggle('open')">
+          <h5>产生正常 → 进入下一问</h5>
+          <div class="detail">确认无饮食、运动、肌肉量、妊娠等干扰后，进入排泄端分析。</div>
+        </div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="fnode"><span class="fq">② 第二问：排不出去，堵在哪一环？</span></div>
+      <div class="fbranch">
+        <div class="fbox" onclick="this.classList.toggle('open')">
+          <h5>肾前性（血送不到肾脏）</h5>
+          <div class="detail">脱水、休克、心衰 → 肾灌注↓ → 滤过↓。<br><b>特征：BUN/Scr 比值↑；Scr 一过性升高，补液后回落。</b>可逆，非肾本身病变。</div>
+        </div>
+        <div class="fbox warn" onclick="this.classList.toggle('open')">
+          <h5>肾性（肾脏本身坏了）→ 进入第三问</h5>
+          <div class="detail">肾小球实质损伤 / 肾小管间质病变 / 肾血管病变，需进一步定位部位与功能。</div>
+        </div>
+        <div class="fbox" onclick="this.classList.toggle('open')">
+          <h5>肾后性（尿排不出去）</h5>
+          <div class="detail">结石、前列腺增生、肿瘤压迫 → 排尿受阻 → 逆压→滤过↓ → BUN、Scr↑。<br><b>常伴尿量骤减、肾积水（超声确诊），解除梗阻后回落。</b></div>
+        </div>
+      </div>
+      <div class="arrow">↓（确认为肾性）</div>
+      <div class="fnode"><span class="fq">③ 第三问：哪个部位、哪项功能坏了？</span></div>
+      <div class="fbranch">
+        <div class="fbox" onclick="this.classList.toggle('open')">
+          <h5>肾小球 · 滤过功能</h5>
+          <div class="detail"><b>组合：</b>Scr↑ + BUN↑ + eGFR↓（同步异常，比值正常）。<br><b>疾病：</b>急慢性肾小球肾炎、慢性肾衰竭、多囊肾、糖尿病肾病。<br><b>信号：</b>eGFR 一过性↑ = 高滤过（早期糖肾/妊娠）。</div>
+        </div>
+        <div class="fbox" onclick="this.classList.toggle('open')">
+          <h5>肾小管 · 浓缩稀释</h5>
+          <div class="detail"><b>组合：</b>尿比重持续↓ + 夜尿增多 + 尿渗透压↓。<br><b>疾病：</b>慢性间质性肾炎、药物性肾损伤（NSAIDs 等）、慢性肾衰、尿崩症。<br><b>要点：</b>夜尿增多常是最早主诉，最易忽略。</div>
+        </div>
+        <div class="fbox" onclick="this.classList.toggle('open')">
+          <h5>肾小管 · 重吸收</h5>
+          <div class="detail"><b>组合：</b>血糖正常 + 尿糖阳性（肾性糖尿）。<br><b>疾病：</b>间质性肾炎、Fanconi 综合征、药物性损伤。<br><b>要点：</b>尿糖(+)必须核对血糖！重吸收环节"金标准探测点"。</div>
+        </div>
+        <div class="fbox" onclick="this.classList.toggle('open')">
+          <h5>肾小管 · 分泌排泄</h5>
+          <div class="detail"><b>组合：</b>尿酸↑（无饮食因素）、顽固性低钾/代谢性酸中毒。<br><b>疾病：</b>尿酸排泄障碍型高尿酸、肾小管酸中毒。<br><b>要点：</b>UA↑需常规核对全套肾功能（双向思考）。</div>
+        </div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="fnode" style="border-color:var(--brand);background:var(--brand-soft);color:var(--brand-d)"><span class="fq">④ 溯源：用药史（氨基糖苷/造影剂/NSAIDs）、脱水、基础病（糖尿病/高血压）</span></div>
+      <div class="fnode" style="border-color:#c9a227;background:#fbf7ef;color:#8a6d12"><span class="fq">⑤ 动态观察：晚期常"球管同损"，需动态追踪</span></div>
+    </div>
+  </section>
+
+  <!-- 总结总表 -->
+  <section class="page" aria-label="总结总表">
+    <h2 class="sec">总结概括总表</h2>
+    <div class="table-wrap">
+    <table>
+      <caption>肾功能核心指标速查（关联度：实心=高 / 灰=中 / 浅=低；"产生端"指非肾脏来源的生理/疾病因素）</caption>
+      <thead><tr><th>指标</th><th>部位/功能</th><th>升高原因</th><th>降低原因</th><th>关联度</th><th>易错要点</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Scr 肌酐</td><td>肾小球·滤过</td>
+          <td><span class="up">↑</span> 产生：肉食/剧烈运动/横纹肌溶解<br>排泄：肾前(脱水) / 肾性(肾炎、肾衰) / 肾毒性药物</td>
+          <td><span class="down">↓</span> 消瘦老年、肌少症、恶病质、妊娠稀释</td>
+          <td>高</td>
+          <td>正常≠肾功能正常（滞后+肌肉量干扰）；eGFR 优先</td>
+        </tr>
+        <tr>
+          <td>BUN 尿素氮</td><td>肾小球滤过+灌注</td>
+          <td><span class="up">↑</span> 产生：高蛋白饮食/消化道出血/烧伤感染<br>排泄：肾前性(最常见) / 肾性 / 肾后梗阻</td>
+          <td><span class="down">↓</span> 低蛋白饮食、重度肝衰、妊娠</td>
+          <td>中</td>
+          <td>特异性低！单看 BUN 不能诊断；BUN/Scr 比值是关键</td>
+        </tr>
+        <tr>
+          <td>eGFR</td><td>整体滤过水平</td>
+          <td><span class="up">↑</span> 妊娠 / 早期糖肾高灌注 / 剧烈运动</td>
+          <td><span class="down">↓</span> 肾性：肾小球减退、CKD / 肾前灌注不足 / 高龄生理性</td>
+          <td>高</td>
+          <td>早于肌酐异常，优先参考；升高≠肾功能好</td>
+        </tr>
+        <tr>
+          <td>UA 尿酸</td><td>肾小管·分泌排泄</td>
+          <td><span class="up">↑</span> 排泄：肾功能减退<br>产生：高嘌呤饮食/饮酒/化疗分解<br>双向恶性循环：肾↓→UA↑→结晶沉积→伤肾</td>
+          <td><span class="down">↓</span> 严重肝损 / 营养不良 / 小管重吸收障碍</td>
+          <td>高</td>
+          <td>UA↑ 必须常规核对肾功能，双向思考</td>
+        </tr>
+        <tr>
+          <td>尿比重</td><td>肾小管·浓缩</td>
+          <td><span class="up">↑</span> 肾外脱水浓缩 / 急性肾炎少尿代偿</td>
+          <td><span class="down">↓</span> 浓缩功能丧失：间质性肾炎、药物损伤、慢性肾衰、尿崩症</td>
+          <td>高</td>
+          <td>持续低比重尿+夜尿增多 = 小管受损典型表现</td>
+        </tr>
+        <tr>
+          <td>尿渗透压</td><td>肾小管·浓缩稀释</td>
+          <td><span class="up">↑</span> 脱水、容量不足</td>
+          <td><span class="down">↓</span> 浓缩衰竭：慢性间质性肾病</td>
+          <td>高</td>
+          <td>精准度高于尿比重，用于疑难鉴别</td>
+        </tr>
+        <tr>
+          <td>尿糖<br>(肾性糖尿)</td><td>肾小管·重吸收</td>
+          <td colspan="2">血糖正常 + 尿糖阳性 → 重吸收功能丧失（间质性肾炎、药物损伤）</td>
+          <td>高</td>
+          <td>尿糖(+)必须核对血糖，勿盲判糖尿病</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2 class="sec" style="margin-top:28px">口诀速记</h2>
+    <div class="flash">① <b>看来源</b>：产生多了还是少了？肉食、肌少、饮食、妊娠等属非肾脏来源的<b>真实改变</b>，先识别再判断是否为肾性异常。</div>
+    <div class="flash">② <b>看通路</b>：肾前（灌注不足，比值↑）、肾后（梗阻）、肾本身？</div>
+    <div class="flash">③ <b>看部位</b>：小球坏（Scr/BUN/eGFR）还是小管伤（比重/尿糖/渗透压）？</div>
+    <div class="flash">④ <b>看功能</b>：滤过、重吸收、浓缩稀释、分泌——四工位逐一排查</div>
+    <div class="flash">⑤ <b>看联动</b>：晚期球管同损，动态追踪 + 溯源用药史/基础病</div>
+  </section>
+
+  <!-- 分级测试 -->
+  <section class="page" aria-label="分级测试">
+    <h2 class="sec">自测巩固</h2>
+    <div class="qtype" role="tablist" aria-label="题型切换">
+      <button class="qtype-btn active" role="tab" aria-selected="true" onclick="switchQ(0,this)">选择题</button>
+      <button class="qtype-btn" role="tab" aria-selected="false" onclick="switchQ(1,this)">填空题</button>
+    </div>
+
+    <div id="quizPane">
+      <p class="subtitle">选择题：第 1~3 题基础记忆，第 4~6 题机制理解，第 7~10 题综合判读。</p>
+      <div class="quiz-box" id="quiz"></div>
+    </div>
+
+    <div id="blankPane" class="hidden">
+      <p class="subtitle">填空题：点击句中挖空处显示正确内容；可逐空点开，或用「显示全部 / 隐藏全部」一次性核对。</p>
+      <div class="blank-list" id="blankList"></div>
+    </div>
+  </section>
+
+  <section class="changelog" aria-label="更新日志">
+    <h2 class="sec">更新日志</h2>
+    <ul class="cl-list">
+      <li><b>v3（2026-08-19）</b>：底部导航补「总结」入口修复测试可达；测试模块新增题型切换（选择题 10 题＋填空题 10 题，点击挖空显示答案）；概念校正——产生端为非肾脏疾病的真实指标改变，非"假象"；指标卡片改为内嵌流程图、点击节点展开机制，去多层嵌套。</li>
+      <li><b>v3.0（2026-08-19）</b>：底部固定导航＋极简引导首页＋克制配色（移除红/黄/绿 emoji，改为圆点分级）。</li>
+      <li><b>v2.1</b>：移动优先极简响应式重构。</li>
+      <li><b>v2.0</b>：修复脚本引号语法错误，恢复全部交互。</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>数据来源：第十版《诊断学》整理 · 仅供学习使用，非临床诊疗依据</footer>
+
+<script>
+// ===== 导航（底部）=====
+function go(i, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('show'));
+  document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
+  const pages = document.querySelectorAll('.page');
+  if(pages[i]) pages[i].classList.add('show');
+  const navBtns = document.querySelectorAll('.bottom-nav button');
+  if(btn){ btn.classList.add('active'); }
+  else if(navBtns[i]){ navBtns[i].classList.add('active'); }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== 工具：去除 emoji 并按层级着色 =====
+function stripLevel(str){
+  return str.replace(/^[🔴🟡🟢]\s*/u,'').replace(/\s*[🔴🟡🟢]$/u,'');
+}
+function levelOf(str){
+  if(/🔴/u.test(str)) return 'high';
+  if(/🟡/u.test(str)) return 'mid';
+  if(/🟢/u.test(str)) return 'low';
+  return '';
+}
+
+// ===== 指标数据（两维 + 关联度 + 机制；产生端=非肾/生理因素的真实改变） =====
+const M = [
+{
+  name:"血肌酐 Scr", organ:"肾小球·滤过", func:"滤过功能", asso:"肾性升高🔴",
+  branches:[
+    {tone:"prod", title:"产生端", sub:"非肾脏疾病 / 生理因素的真实改变", nodes:[
+      {dir:"up", lv:"low", l:"大量进食肉食", m:"外源肌酸摄入↑→代谢为肌酐↑。肾脏功能正常，属检验前饮食因素——是真实浓度升高，但非肾病所致。"},
+      {dir:"up", lv:"low", l:"剧烈运动", m:"肌肉代谢加速→肌酐生成一过性增多。"},
+      {dir:"up", lv:"mid", l:"横纹肌溶解", m:"肌肉大量破坏→肌酐急剧升高（常伴 CK 剧升、肌红蛋白尿）；可继发急性肾损伤，需警惕转为真肾性。"},
+      {dir:"down", lv:"low", l:"消瘦老年 / 肌少症 / 恶病质", m:"肌肉量↓→肌酐生成基线低→即使肾功能已减退，Scr 仍可偏低（数值被掩盖）——临床漏诊头号陷阱，必须看 eGFR。"},
+      {dir:"down", lv:"low", l:"妊娠期血液稀释", m:"血容量↑→肌酐浓度稀释性降低，生理性，无病理意义。"},
+    ]},
+    {tone:"excr", title:"排泄端", sub:"肾脏相关：部位 / 功能", nodes:[
+      {dir:"up", lv:"high", l:"肾性·肾实质损伤", m:"肾小球滤过膜受损→肌酐无法滤出→血中潴留。见于急慢性肾小球肾炎、慢性肾衰竭、多囊肾、肾小管坏死。"},
+      {dir:"up", lv:"mid", l:"肾前性·灌注不足", m:"脱水/休克/心衰→有效循环血量↓→肾脏灌注↓→滤过率↓→肌酐一过性升高。补液纠正灌注后可回落，肾本身未坏。"},
+      {dir:"up", lv:"high", l:"药物性肾损伤", m:"氨基糖苷类、造影剂直接毒性损伤肾小管/肾小球→滤过功能下降。"},
+    ]}
+  ],
+  insight:"检验核心：肌酐正常 ≠ 肾功能正常（滞后性 + 肌肉量干扰双重）；青壮年/健身人群基线偏高勿判损伤，而肌少人群 Scr 偏低可掩盖肾衰。"
+},
+{
+  name:"血尿素氮 BUN", organ:"肾小球滤过+灌注", func:"滤过（特异性低）", asso:"需联合Scr🟡",
+  branches:[
+    {tone:"prod", title:"产生端", sub:"非肾脏疾病 / 生理因素的真实改变", nodes:[
+      {dir:"up", lv:"low", l:"高蛋白饮食", m:"外源蛋白↑→分解代谢↑→尿素合成↑。肾脏正常，是真实升高。"},
+      {dir:"up", lv:"mid", l:"消化道大出血", m:"血液蛋白在肠道分解吸收→大量尿素生成→BUN↑ 而肌酐正常。"},
+      {dir:"up", lv:"mid", l:"烧伤 / 感染 / 创伤", m:"应激状态下组织蛋白高分解代谢→尿素生成增多。"},
+      {dir:"down", lv:"low", l:"重度肝衰竭", m:"尿素在肝脏合成→肝坏→合成能力↓→BUN↓（此时 Scr 正常，可与肾衰区分）。"},
+      {dir:"down", lv:"low", l:"低蛋白饮食 / 妊娠稀释", m:"原料不足或血容量稀释，生理性。"},
+    ]},
+    {tone:"excr", title:"排泄端", sub:"肾脏相关：部位 / 功能", nodes:[
+      {dir:"up", lv:"mid", l:"肾前性（最常见）", m:"脱水/心衰→灌注↓→滤过↓，同时肾小管代偿性重吸收 BUN↑——双重推高，故 BUN/Scr 比值↑→指向肾前性。"},
+      {dir:"up", lv:"high", l:"肾性·各类肾实质病变", m:"肾小球滤过功能受损→BUN 潴留，伴肌酐同步升高，比值接近正常→指向肾性。"},
+      {dir:"up", lv:"mid", l:"肾后性梗阻", m:"结石/前列腺增生/肿瘤→排尿受阻→肾盂内逆向压力→滤过↓。常伴尿量骤减、肾积水。"},
+    ]}
+  ],
+  insight:"检验核心：BUN 产生端分支庞大→特异性低，绝不可单凭 BUN 诊断肾病。审核时关注 BUN/Scr 比值：↑=肾前，正常=肾性。"
+},
+{
+  name:"eGFR 估算肾小球滤过率", organ:"整体肾小球", func:"滤过（CKD金标准）", asso:"CKD分期🔴",
+  branches:[
+    {tone:"prod", title:"产生端", sub:"非肾脏 / 生理因素（计算值波动）", nodes:[
+      {dir:"up", lv:"low", l:"妊娠中晚期 / 剧烈运动", m:"血容量↑或代偿性血流增加→生理性高滤过。"},
+      {dir:"down", lv:"low", l:"高龄生理性减退", m:"肾单位随年龄自然丢失→eGFR 缓慢下降，需与病理鉴别。"},
+      {dir:"down", lv:"mid", l:"肾前性灌注不足", m:"脱水等可逆因素→滤过暂时下降，纠正后恢复（非肾实质病变）。"},
+    ]},
+    {tone:"excr", title:"排泄端", sub:"肾脏相关：滤过功能", nodes:[
+      {dir:"up", lv:"high", l:"早期糖尿病肾病高灌注", m:"高血糖→肾小球高灌注高滤过→eGFR↑→长期高滤过'透支'后必回落，是早期糖肾重要信号！"},
+      {dir:"down", lv:"high", l:"肾性·CKD / 急性肾损伤", m:"肾小球实质损伤→滤过率下降。轻度下降=早期肾损伤；持续性进行性下降提示 CKD 进展，需尽早干预。"},
+    ]}
+  ],
+  insight:"检验核心：eGFR 早于肌酐出现异常，审核肾功能应<b>优先参考并主动计算报告</b>；eGFR 升高在糖尿病患者是危险信号而非好消息；生理性/肾前性升高可逆，勿误判。"
+},
+{
+  name:"血尿酸 UA", organ:"肾小管·分泌排泄", func:"分泌排泄功能", asso:"双向关联🔴",
+  branches:[
+    {tone:"prod", title:"产生端", sub:"非肾脏疾病 / 生理因素的真实改变", nodes:[
+      {dir:"up", lv:"low", l:"高嘌呤饮食、饮酒", m:"外源嘌呤↑→尿酸合成↑，肾脏正常。"},
+      {dir:"up", lv:"mid", l:"白血病化疗后", m:"大量细胞被杀死分解→核酸释放→嘌呤代谢剧增→尿酸急升（肿瘤溶解综合征，可继发急性肾损伤）。"},
+      {dir:"down", lv:"low", l:"严重肝损害、营养不良", m:"嘌呤合成原料/能力不足。"},
+      {dir:"down", lv:"mid", l:"肾小管重吸收障碍", m:"肾小管病变导致重吸收减少→尿酸从尿中丢失过多。"},
+    ]},
+    {tone:"excr", title:"排泄端", sub:"肾脏相关：分泌排泄", nodes:[
+      {dir:"up", lv:"high", l:"肾功能减退（排泄减少）", m:"尿酸主要经肾排泄→肾小球滤过/肾小管分泌↓→尿酸潴留升高。"},
+      {dir:"up", lv:"high", l:"双向恶性循环", m:"肾功能↓→UA 排泄↓→UA↑→尿酸盐结晶沉积→慢性损伤肾小球→肾功能进一步↓——互为因果的恶性闭环（跨越产生与排泄，是肾性加重因素）。"},
+    ]}
+  ],
+  insight:"检验核心：遇到 UA 升高，必须常规核对全套肾功能（Scr/eGFR），双向思考；反之肾功能减退者也关注尿酸。"
+},
+{
+  name:"尿比重 / 尿渗透压", organ:"肾小管·远端集合管", func:"浓缩稀释功能", asso:"小管损伤🔴",
+  branches:[
+    {tone:"prod", title:"产生端", sub:"非肾脏 / 生理因素（浓缩的肾外驱动）", nodes:[
+      {dir:"up", lv:"low", l:"脱水 / 大量出汗 / 吐泻", m:"体内缺水→肾脏代偿性加强浓缩→尿比重↑。说明浓缩功能完好，属正常生理代偿。"},
+      {dir:"up", lv:"mid", l:"急性肾小球肾炎少尿期", m:"滤过减少但小管浓缩功能尚存→尿量少而比重代偿性升高（肾小球病变，浓缩功能未损）。"},
+    ]},
+    {tone:"excr", title:"排泄端", sub:"肾脏相关：小管浓缩功能", nodes:[
+      {dir:"down", lv:"high", l:"慢性间质性肾炎 / 药物性肾损伤", m:"长期服 NSAIDs 等→肾小管间质受损→浓缩功能下降→持续性低比重尿 + 夜尿增多（典型表现，且常是最早主诉）。"},
+      {dir:"down", lv:"high", l:"慢性肾衰竭", m:"肾单位广泛毁损→浓缩稀释双重障碍→尿比重固定在 1.010 左右（等渗尿）。"},
+      {dir:"down", lv:"mid", l:"尿崩症", m:"ADH 缺乏或不敏感→无法浓缩→大量低比重稀释尿。"},
+    ]}
+  ],
+  insight:"检验核心：此指标问的是'浓不浓'而非'排不排'。夜尿多、电解质紊乱患者核心病变常在肾小管，勿只盯小球指标。尿渗透压精准度更高，用于疑难鉴别。"
+},
+{
+  name:"肾性糖尿（尿糖探测点）", organ:"肾小管·近曲小管", func:"重吸收功能", asso:"重吸收探测🔴",
+  branches:[
+    {tone:"prod", title:"产生端", sub:"非肾脏 / 全身代谢因素（鉴别点）", nodes:[
+      {dir:"", lv:"mid", l:"血糖升高 + 尿糖阳性", m:"血糖超过肾糖阈（约 10 mmol/L）→属糖尿病/应激性高血糖，与小管无关。"},
+    ]},
+    {tone:"excr", title:"排泄端", sub:"肾脏相关：小管重吸收", nodes:[
+      {dir:"", lv:"high", l:"血糖正常 + 尿糖阳性", m:"近曲小管重吸收葡萄糖能力障碍（肾糖阈↓）→葡萄糖漏入尿液。见于间质性肾炎、药物性肾损伤、Fanconi 综合征。"},
+    ]}
+  ],
+  insight:"检验核心：尿糖(+)必须核对血糖！血糖正常的尿糖阳性是肾小管重吸收环节的'金标准探测点'，勿盲目判为糖尿病。"
+}
+];
+
+const mBox = document.getElementById('metrics');
+M.forEach((m,idx)=>{
+  const d = document.createElement('div');
+  d.className = 'metric';
+  const assoClean = stripLevel(m.asso);
+  const assoLv = levelOf(m.asso);
+  const assoCls = assoLv==='high' ? 'asso' : (assoLv==='mid' ? 'asso mid' : 'asso low');
+  const no = String(idx+1).padStart(2,'0');
+  const branchesHtml = m.branches.map(b=>`
+    <div class="fc-branch ${b.tone}">
+      <h4>${b.title}</h4>
+      <div class="bsub">${b.sub}</div>
+      <div class="fc-tree">
+        ${b.nodes.map(n=>`
+          <div class="fc-node lv-${n.lv}" onclick="this.classList.toggle('open')">
+            <div class="nlabel">
+              ${n.dir?`<span class="ndir ${n.dir}">${n.dir==='up'?'↑':'↓'}</span>`:''}
+              <span>${n.l}</span>
+              <span class="nlv ${n.lv}"></span>
+            </div>
+            <div class="fc-detail">${n.m}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+  d.innerHTML = `
+  <div class="metric-head" onclick="this.parentNode.classList.toggle('open')">
+    <div class="title-wrap">
+      <span class="metric-no">${no}</span>
+      <h3>${m.name}</h3>
+    </div>
+    <div class="badges">
+      <span class="badge b-organ">📍 ${m.organ}</span>
+      <span class="badge b-func">⚙️ ${m.func}</span>
+      <span class="badge ${assoCls}">${assoClean}</span>
+      <span class="toggle-hint">展开 ▼</span>
+    </div>
+  </div>
+  <div class="metric-body">
+    <div class="fc">
+      <div class="fc-root"><span class="node">${m.name}</span></div>
+      <div class="fc-line"></div>
+      <div class="fc-branches">${branchesHtml}</div>
+    </div>
+    <div class="insight">${m.insight}</div>
+  </div>`;
+  mBox.appendChild(d);
+});
+
+// ===== 分级测试 =====
+const quiz = [
+ {lv:"基础", q:"关于血肌酐，下列说法正确的是：",
+  o:["肌酐正常即可排除肾功能减退","肌酐受肌肉体量影响大，消瘦老年患者肌酐正常可能是被掩盖的（肌少致基线偏低）","肌酐升高一定是肾脏本身出了问题"],a:1,
+  e:"肌酐存在滞后性且受肌肉量干扰：消瘦老年者肌肉量少→基线低→肾功能减退时 Scr 仍可偏低（被掩盖）；反之肉食、运动、脱水、横纹肌溶解均可使其升高，须先识别产生端（非肾脏来源的生理/疾病因素）与肾前因素。"},
+ {lv:"基础", q:"BUN/Scr 比值明显升高，最提示：",
+  o:["肾性实质损伤","肾前性灌注不足（脱水、心衰）","肾后性梗阻"],a:1,
+  e:"肾前性时灌注↓致滤过↓，同时肾小管代偿性重吸收 BUN↑，双重推高 BUN → 比值↑。肾性损伤时两者同步升高，比值接近正常。"},
+ {lv:"基础", q:"慢性肾病(CKD)分期的金标准是：",
+  o:["血肌酐","血尿素氮","eGFR","尿比重"],a:2,
+  e:"第十版诊断学明确 eGFR 为 CKD 分期核心依据，且早于肌酐出现异常，临床优先参考。"},
+ {lv:"机制", q:"糖尿病患者 eGFR 升高至 135 mL/min，正确的机制理解是：",
+  o:["肾功能非常好，无需关注","高血糖致肾小球高灌注高滤过，是早期糖尿病肾病信号，长期透支后必回落","检验误差"],a:1,
+  e:"高血糖→肾小球高灌注→eGFR↑。这是肾小球'代偿性透支'，持续高滤过会损伤滤过膜，后期 eGFR 回落进入肾功能减退。"},
+ {lv:"机制", q:"BUN 升高而肌酐正常，患者有黑便史，最可能的机制是：",
+  o:["肾小球滤过功能受损","消化道出血血液蛋白被分解吸收，尿素产生过多","肾小管重吸收障碍"],a:1,
+  e:"典型的'产生过多'分支：肠道积血分解→蛋白吸收入血→肝脏合成尿素↑→BUN↑，而肌酐（肌肉代谢产物）不受影响。这正是 BUN 特异性低的根源——属非肾脏来源的生理/疾病改变。"},
+ {lv:"机制", q:"血尿酸与肾功能的关系，正确的理解是：",
+  o:["尿酸高只与痛风有关","肾差→尿酸高，单向因果","双向恶性循环：肾功能↓致 UA 排泄↓，长期高尿酸又结晶沉积反伤肾脏"],a:2,
+  e:"尿酸经肾排泄，肾功能减退时潴留升高；长期高尿酸血症形成尿酸盐结晶沉积，慢性损伤肾小球——互为因果的恶性闭环，检验审核需双向排查。"},
+ {lv:"综合", q:"老年女性78岁，消瘦，双下肢水肿，夜尿2~3次。Scr 88 μmol/L（参考范围内），eGFR 48，尿比重持续1.008。最完整的判断是：",
+  o:["肌酐正常，肾功能无异常","eGFR 提示 CKD 3期（肌少症掩盖了 Scr），且持续低比重尿提示肾小管浓缩功能受损——球管均需评估","只需关注肾小球指标"],a:1,
+  e:"三层思维：①肌少症使 Scr 数值被掩盖（肌肉量少致基线偏低），eGFR 48 为真实滤过水平（CKD 3期）；②夜尿多+低比重尿→定位肾小管浓缩功能受损；③需溯源用药史（如 NSAIDs）等病因。"},
+ {lv:"综合", q:"男性45岁，呕吐腹泻3天，尿量减少。Scr 156，BUN 18.5。作为检验审核人员，最恰当的处理是：",
+  o:["直接报告急性肾损伤","提示 BUN/Scr 比值升高指向肾前性（脱水、灌注不足），建议补液纠正后复查","建议立即透析评估"],a:1,
+  e:"比值升高→肾前性。脱水致灌注↓+小管重吸收 BUN↑。这是可逆的功能性改变，补液纠正灌注后指标可回落，与肾实质损伤（比值正常）截然不同——检验报告应体现这一鉴别线索。"},
+ {lv:"综合", q:"男性52岁，糖尿病6年。血糖控制可，但尿糖持续(+)，eGFR 132。解读为：",
+  o:["尿糖阳性=糖尿病加重，eGFR 高=肾功能好","血糖正常的尿糖阳性提示肾性糖尿（肾小管重吸收障碍）；eGFR 升高是早期糖肾高灌注信号——两项均为警惕信号","均为正常现象"],a:1,
+  e:"两个'看似好消息'都是陷阱：①血糖正常+尿糖阳性→定位肾小管重吸收功能；②eGFR↑→早期糖肾高滤过。糖尿病患者可能出现球（高滤过）管（重吸收障碍）双线异常。"},
+ {lv:"综合", q:"肾功能指标判读的完整三级思维顺序是：",
+  o:["看最异常的指标→发报告","识别产生端（非肾来源的饮食、肌肉量、妊娠等因素）→区分肾前/肾后/肾性→定位部位与功能→溯源病因","只看 eGFR 即可"],a:1,
+  e:"①看来源（识别饮食、肌肉量、妊娠等非肾脏来源因素）→②看通路（肾前比值↑/肾后梗阻/肾性）→③看部位功能（小球滤过 vs 小管重吸收、浓缩稀释、分泌）→④溯源（用药史、基础病）→⑤动态观察（晚期球管同损）。"}
+];
+
+let qi=0, score=0;
+function renderQuiz(){
+  const box = document.getElementById('quiz');
+  if(qi>=quiz.length){
+    const pct = Math.round(score/quiz.length*100);
+    box.innerHTML = `<div class="score">🎯 得分：${score} / ${quiz.length}（${pct}%）</div>
+    <p style="text-align:center;line-height:2;color:var(--muted)">${pct>=80?'🏆 优秀！三级定位思维已扎实掌握，可投入实战审核':pct>=60?'👍 良好！建议回顾错题对应的流程节点机制':'💪 继续加油！建议从指标逻辑模块重新学习，重点点击各流程节点查看机制'}</p>
+    <div style="text-align:center"><button class="btn" onclick="qi=0;score=0;renderQuiz()">重新测试</button></div>`;
+    return;
+  }
+  const q = quiz[qi];
+  box.innerHTML = `
+  <div class="progress"><div class="progress-bar" style="width:${qi/quiz.length*100}%"></div></div>
+  <p style="color:#7f8c8d;font-size:.85em">第 ${qi+1} / ${quiz.length} 题 · <span style="background:#eef1f4;color:#5a6470;padding:2px 10px;border-radius:10px">${q.lv}题</span></p>
+  <h3 style="margin:12px 0 18px;line-height:1.7;font-size:1.08rem">${q.q}</h3>
+  ${q.o.map((o,i)=>`<button class="opt-btn" onclick="answer(${i})">${o}</button>`).join('')}
+  <div id="qfb"></div>`;
+}
+function answer(i){
+  const q = quiz[qi];
+  const btns = document.querySelectorAll('#quiz .opt-btn');
+  btns.forEach((b,j)=>{ b.disabled=true;
+    if(j===q.a){b.classList.add('correct');}
+    if(j===i&&i!==q.a){b.classList.add('wrong');} });
+  if(i===q.a) score++;
+  document.getElementById('qfb').innerHTML = `
+  <div class="flash ${i===q.a?'g':'b'}">${i===q.a?'✅ 正确！':'❌ 正确答案已标绿。'} <b>解析：</b>${q.e}</div>
+  <button class="btn" onclick="qi++;renderQuiz()">${qi===quiz.length-1?'查看成绩':'下一题'}</button>`;
+}
+renderQuiz();
+
+// ===== 题型切换（选择题 / 填空题）=====
+function switchQ(i, btn){
+  document.querySelectorAll('.qtype-btn').forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+  btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+  document.getElementById('quizPane').classList.toggle('hidden', i!==0);
+  document.getElementById('blankPane').classList.toggle('hidden', i!==1);
+}
+
+// ===== 填空题（点击挖空处显示正确内容）=====
+const blanks = [
+  {s:`血肌酐正常 ≠ 肾功能正常，因为存在 {{滞后性}} 与 {{肌肉量干扰}} 双重干扰，审核时应优先参考 {{eGFR}}。`},
+  {s:`血尿素氮（BUN）特异性低，单看不能诊断肾病；审核时关注 {{BUN/Scr 比值}}：比值升高指向 {{肾前性}}，比值正常指向 {{肾性}}。`},
+  {s:`慢性肾病（CKD）分期的金标准是 {{eGFR}}，它早于 {{血肌酐}} 出现异常。`},
+  {s:`糖尿病患者 eGFR 升高，实质是 {{高灌注高滤过}}（早期糖尿病肾病信号），长期「透支」后 {{必回落}}。`},
+  {s:`肾小管浓缩功能受损的典型表现是 {{夜尿增多}} 与持续 {{低比重尿}}（尿比重固定约 1.010）。`},
+  {s:`尿糖阳性必须核对 {{血糖}}：血糖正常＋尿糖阳性提示 {{肾性糖尿}}（肾小管重吸收障碍），而非糖尿病。`},
+  {s:`尿酸与肾功能形成 {{双向恶性循环}}：肾功能下降致尿酸排泄减少、尿酸升高，结晶沉积后 {{反伤肾脏}}。`},
+  {s:`检验中的「产生端」改变指来自 {{非肾脏疾病或生理因素}}（如饮食、肌肉量、妊娠）的真实指标变化，并非 {{假象}}。`},
+  {s:`肾前性灌注不足时，BUN/Scr 比值 {{升高}}，且补液纠正灌注后指标 {{可逆、可回落}}。`},
+  {s:`晚期肾脏病常「{{球管同损}}」，临床需 {{动态追踪}} 并溯源用药史与基础病。`},
+];
+
+function renderBlanks(){
+  const list = document.getElementById('blankList');
+  list.innerHTML = blanks.map((item,idx)=>{
+    const body = item.s.replace(/\{\{(.*?)\}\}/g, (m,ans)=>
+      `<span class="blank" role="button" tabindex="0" data-ans="${ans}" onclick="revealBlank(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();revealBlank(this)}">点击显示</span>`
+    );
+    return `<div class="blank-card">
+      <div class="bc-body"><span class="bc-no">${idx+1}</span>${body}</div>
+      <div class="blank-tools">
+        <button class="btn-small" onclick="revealAll(this,true)">显示全部</button>
+        <button class="btn-small" onclick="revealAll(this,false)">隐藏全部</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function revealBlank(el){
+  if(el.classList.contains('revealed')){ el.classList.remove('revealed'); el.textContent='点击显示'; }
+  else { el.classList.add('revealed'); el.textContent=el.dataset.ans; }
+}
+function revealAll(btn, show){
+  const card = btn.closest('.blank-card');
+  card.querySelectorAll('.blank').forEach(b=>{
+    if(show){ b.classList.add('revealed'); b.textContent=b.dataset.ans; }
+    else { b.classList.remove('revealed'); b.textContent='点击显示'; }
+  });
+}
+
+renderBlanks();
+</script>
+</body>
+</html>
